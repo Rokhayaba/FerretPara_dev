@@ -18,6 +18,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -31,15 +33,14 @@ public class CallerRunsPolicyDemo implements Runnable{
 //	public static URL urlvep;
 //	public String [] Varlist;
 	//public static volatile String [] test;
-	
-	public static volatile ArrayList<String> StockLineAnnot;
+	public static volatile Map<Integer, String> StockLineAnnot;
 	private int cpt;
 	private String Varid;
 	 
 		public CallerRunsPolicyDemo (int cpt,String Varid) {
 			
 		 if(CallerRunsPolicyDemo.StockLineAnnot == null)
-			 CallerRunsPolicyDemo.StockLineAnnot = new ArrayList<>();
+			 CallerRunsPolicyDemo.StockLineAnnot = new HashMap<>();
 		 
 		 this.cpt = cpt; 
 		 this.Varid = Varid;
@@ -274,18 +275,8 @@ public class CallerRunsPolicyDemo implements Runnable{
 //					        }
 //						 
 //					   }
-                    
-					int listSize = this.cpt+1;
-                    if(CallerRunsPolicyDemo.StockLineAnnot.size() < listSize){
-                    	for(int i=0; i<listSize; i++){
-                    		if(CallerRunsPolicyDemo.StockLineAnnot.size() < listSize){
-                    			CallerRunsPolicyDemo.StockLineAnnot.add("");
-                    		}else{
-                    			break;
-                    		}
-                    	}
-                    }
-                    CallerRunsPolicyDemo.StockLineAnnot.set(this.cpt, Varid + "\t" +geneSymbol + "\t" + geneId+ "\t" + fxnName + "\t" + proteinPos + "\t" + aa2 + aa1  + "\t" + proteinAcc + "\t" + sift_score+ "\t" + sift_prediction+ "\t" + polyphen_score+ "\t" + polyphen_prediction);
+
+                    CallerRunsPolicyDemo.StockLineAnnot.put(this.cpt, tst + "\t" +geneSymbol + "\t" + geneId+ "\t" + fxnName + "\t" + proteinPos + "\t" + aa2 + aa1  + "\t" + proteinAcc + "\t" + sift_score+ "\t" + sift_prediction+ "\t" + polyphen_score+ "\t" + polyphen_prediction);
                     
 //    			} catch (IOException e) {
 //					// TODO Auto-generated catch block
