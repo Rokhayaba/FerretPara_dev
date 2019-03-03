@@ -35,13 +35,15 @@ public class CallerRunsPolicyDemo implements Runnable{
 	//public static volatile String [] test;
 	public static volatile Map<Integer, String> StockLineAnnot;
 	private int cpt;
+	private String Varid;
 	 
-		public CallerRunsPolicyDemo (int cpt) {
+		public CallerRunsPolicyDemo (int cpt,String Varid) {
 			
 		 if(CallerRunsPolicyDemo.StockLineAnnot == null)
 			 CallerRunsPolicyDemo.StockLineAnnot = new HashMap<>();
 		 
 		 this.cpt = cpt; 
+		 this.Varid = Varid;
 		}
 
 		@Override
@@ -66,25 +68,24 @@ public class CallerRunsPolicyDemo implements Runnable{
 			 Boolean passee1 = false;
         	 BufferedReader br = null;
         	 BufferedReader brvep = null;
-        	 String Varid = "11689281";
-        	String tst = FerretData.text[2];
-        	System.out.print("\t text[2]\t" + FerretData.text[2]);
-            if (FerretData.text[2].contains("indel") == true){
-         	   System.out.print("Nous avons un indel:\t" + FerretData.text[2]);
-         	   Pattern p = Pattern.compile("^(indel_rs)([0-9]+)(.*)");
-         	   Matcher m = p.matcher(FerretData.text[2]);
-         	  if (m.find()) {
-         		 Varid = m.group(2);
-         		System.out.print("Varid indel modifié : " + Varid);
-         	  }
-         	  
-            }
-            
-            else {
-         	   Varid = FerretData.text[2].substring(2);
-         	   System.out.print("Varid no indel modifié : " + Varid);
-            }
-        	//String Varid = FerretData.text[2].substring(2) ;
+        	//String tst = FerretData.text[2];
+        	//System.out.print("\t text[2]\t" + FerretData.text[2]);
+//            if (FerretData.text[2].contains("indel") == true){
+//         	   System.out.print("Nous avons un indel:\t" + FerretData.text[2]);
+//         	   Pattern p = Pattern.compile("^(indel_rs)([0-9]+)(.*)");
+//         	   Matcher m = p.matcher(FerretData.text[2]);
+//         	  if (m.find()) {
+//         		 Varid = m.group(2);
+//         		System.out.print("Varid indel modifié : " + Varid);
+//         	  }
+//         	  
+//            }
+//            
+//            else {
+//         	   Varid = FerretData.text[2].substring(2);
+//         	   System.out.print("Varid no indel modifié : " + Varid);
+//            }
+        	
         	
         	try {
             	System.out.println("\tCe qu'il y'a dans varid dans le call run\t" + Varid);

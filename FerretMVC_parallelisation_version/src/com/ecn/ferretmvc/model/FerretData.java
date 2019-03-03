@@ -58,14 +58,15 @@ public class FerretData extends SwingWorker<Integer, String> {
 	//private static BufferedReader br;
 	//private static BufferedReader brvep;
 	//public static String Varid = null;
-	BufferedWriter mapWrite, infoWrite, pedWrite, frqWrite;
-    boolean fileEmpty, frqFileEmpty;
-    int index;
-    int espErrorCount;
-    String s;
-    String[][] genotypes;
-    LinkedList<EspInfoObj> espData;
-    public static String[] text;
+	//BufferedWriter mapWrite, infoWrite, pedWrite, frqWrite;
+    //boolean fileEmpty, frqFileEmpty;
+    //int index;
+    //int espErrorCount;
+   // String s;
+    //String[][] genotypes;
+    //LinkedList<EspInfoObj> espData;
+    //public static String[] text;
+    
     //private String [] StockLineFreq;
     private Map<Integer, String> StockLineFreq;
 
@@ -367,7 +368,7 @@ public class FerretData extends SwingWorker<Integer, String> {
         ArrayList<String> peopleOfInterest = new ArrayList<>();
         int variantCounter = 0;
         int peopleCounter = 0;
-        genotypes = null;
+        String[][] genotypes = null;
 
         ArrayList<InputRegion> sortedQueries = sortByWindow(queries);
         String webAddress = ftpAddress.replace('$', '1');
@@ -426,7 +427,7 @@ public class FerretData extends SwingWorker<Integer, String> {
         }
 
         publish("Downloading Data from 1000 Genomes...");
-        //String s;
+        String s;
         long startTime = 0;
         Integer tempInt = null;
 
@@ -586,7 +587,7 @@ public class FerretData extends SwingWorker<Integer, String> {
             // end VCF writing
 
             //LinkedList<EspInfoObj> espData = null;
-             espData = null;
+            LinkedList<EspInfoObj> espData = null;
             if (retrieveESP) {
                 publish("Downloading Data from Exome Sequencing Project...");
                 espData = FerretData.exomeSequencingProject(sortedQueries);
@@ -611,11 +612,9 @@ public class FerretData extends SwingWorker<Integer, String> {
                 }
                 familyInfoRead.close();
 
-
-
-//                BufferedWriter mapWrite = null, infoWrite = null, pedWrite = null, frqWrite = null;
-//                boolean fileEmpty = true, frqFileEmpty = true;
-
+                BufferedWriter mapWrite = null, infoWrite = null, pedWrite = null, frqWrite = null;
+                boolean fileEmpty = true, frqFileEmpty = true;
+                
                 mapWrite = null; infoWrite = null; pedWrite = null; frqWrite = null;
                 fileEmpty = true; frqFileEmpty = true;
 
@@ -653,27 +652,28 @@ public class FerretData extends SwingWorker<Integer, String> {
                     }
                 }
 
-                //int index = 0;
-                index = 0;
-                //int espErrorCount = 0;
-                espErrorCount = 0;
+                int index = 0;
+               // index = 0;
+               
+               int espErrorCount = 0;
 
                 //ExecutorService executorvep = Executors.newFixedThreadPool(MYTHREADS);
-
+                String Varid = null;
               int count = 0;
               StockLineFreq = new HashMap<>();
 
                 while ((s = vcfRead.readLine()) != null) {
-
-
-
-                    text = s.split("\t");
-
+                	
+                   String [] text = s.split("\t");
+                    System.out.print("\t text" + text[2]);
+                    Varid = text[2].substring(2);
+                	System.out.println("Varid : " + Varid);
+                   
 /* text[2] contains all the rsid for a gene, a locus or variants inputted by the user*/
 
-
-
-                 worker = new CallerRunsPolicyDemo(count);
+                   
+                   
+                 worker = new CallerRunsPolicyDemo(count,Varid);
                  executor.execute(worker);
 
 
@@ -843,9 +843,9 @@ public class FerretData extends SwingWorker<Integer, String> {
               	while (!executor.isTerminated()) {
 
               	}
-              	//CallerRunsPolicyDemo.Ecriturefile();
-
-//              	System.out.println("\nFinished all threads");
+            
+              	
+              	System.out.println("\nFinished all threads");
               	 File freqFile = new File(fileName + "AlleleFreq.frq");
                  freqFile.createNewFile();
                  frqWrite = new BufferedWriter(new FileWriter(freqFile));
@@ -1559,7 +1559,5 @@ public class FerretData extends SwingWorker<Integer, String> {
 //			System.out.println("mgroup1" + m.group(1)); // Le contenu entre <b> et </b>
 //		}
 //}
-    public String [] gettext() {
-        return text;
-    }
+   
 }
