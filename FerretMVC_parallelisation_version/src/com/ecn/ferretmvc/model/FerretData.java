@@ -3,6 +3,7 @@ package com.ecn.ferretmvc.model;
 import com.ecn.ferretmvc.main.FerretMain;
 import com.ecn.ferretmvc.view.GUI;
 
+import java.util.*;
 import java.util.regex.*;
 import java.awt.Component;
 import java.awt.Desktop;
@@ -22,12 +23,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.CodeSource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.text.DecimalFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,7 +67,7 @@ public class FerretData extends SwingWorker<Integer, String> {
     LinkedList<EspInfoObj> espData;
     public static String[] text;
     //private String [] StockLineFreq;
-    private ArrayList<String> StockLineFreq;
+    private Map<Integer, String> StockLineFreq;
 
 	
 	private Runnable worker;
@@ -666,7 +661,7 @@ public class FerretData extends SwingWorker<Integer, String> {
                 //ExecutorService executorvep = Executors.newFixedThreadPool(MYTHREADS);
                 
               int count = 0;
-              StockLineFreq = new ArrayList<>();
+              StockLineFreq = new HashMap<>();
      			
                 while ((s = vcfRead.readLine()) != null) {
 
@@ -773,7 +768,7 @@ public class FerretData extends SwingWorker<Integer, String> {
                                 }
                                 frqFileEmpty = false;
                                 
-                                StockLineFreq.add((temp.getChr() + "\t" + snpName + "\t" + temp.getPos() + "\t"
+                                StockLineFreq.put(count,(temp.getChr() + "\t" + snpName + "\t" + temp.getPos() + "\t"
                                         + temp.getRefAllele() + "\t" + temp.getAltAllele() + "\t" + "." + "\t" + "." + "\t"
                                         + df.format(temp.getEAFreq()) + "\t" + df.format(temp.getAAFreq())));
                                 
@@ -786,7 +781,7 @@ public class FerretData extends SwingWorker<Integer, String> {
                             if (variantPossibilities[0].equals(temp.getRefAllele()) && variantPossibilities[1].equals(temp.getAltAllele())) {
                                 if ((freqZero >= MAF && freqOne >= MAF && freqOne <= MAFMax) || (temp.getEAFreq() >= espMAF && temp.getEAFreq() <= (1 - espMAF)) || (temp.getAAFreq() >= espMAF && temp.getAAFreq() <= (1 - espMAF))) {
                                     frqFileEmpty = false;
-                                    StockLineFreq.add((text[0] + "\t" + text[2] + "\t" + text[1] + "\t"
+                                    StockLineFreq.put(count,(text[0] + "\t" + text[2] + "\t" + text[1] + "\t"
                                             + variantPossibilities[0] + "\t" + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t"
                                             + df.format(temp.getEAFreq()) + "\t" + df.format(temp.getAAFreq() +"t")));
                                 }
@@ -794,7 +789,7 @@ public class FerretData extends SwingWorker<Integer, String> {
                             } else if (variantPossibilities[0].equals(temp.getAltAllele()) && variantPossibilities[1].equals(temp.getRefAllele())) {
                                 if ((freqOne >= MAF && freqZero >= MAF && freqOne <= MAFMax) || (temp.getEAFreq() >= espMAF && temp.getEAFreq() <= (1 - espMAF)) || (temp.getAAFreq() >= espMAF && temp.getAAFreq() <= (1 - espMAF))) {
                                     frqFileEmpty = false;
-                                    StockLineFreq.add((text[0] + "\t" + text[2] + "\t" + text[1] + "\t"
+                                    StockLineFreq.put(count,(text[0] + "\t" + text[2] + "\t" + text[1] + "\t"
                                             + variantPossibilities[0] + "\t" + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t"
                                             + df.format(temp.getEAFreqAlt()) + "\t" + df.format(temp.getAAFreqAlt()+"t")));
                                 }
@@ -802,7 +797,7 @@ public class FerretData extends SwingWorker<Integer, String> {
                             } else {
                                 if (freqOne >= MAF && freqZero >= MAF && freqOne <= MAFMax) {
                                     frqFileEmpty = false;
-                                    StockLineFreq.add((text[0] + "\t" + text[2] + "\t" + text[1] + "\t"
+                                    StockLineFreq.put(count,(text[0] + "\t" + text[2] + "\t" + text[1] + "\t"
                                             + variantPossibilities[0] + "\t" + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t"
                                             + "." + "\t" + "."+"t"));
                                 }
@@ -811,7 +806,7 @@ public class FerretData extends SwingWorker<Integer, String> {
                         } else if (variantPossibilities.length == 2) {
                             if (freqOne >= MAF && freqZero >= MAF && freqOne <= MAFMax) {
                                 frqFileEmpty = false;
-                                StockLineFreq.add((text[0] + "\t" + text[2] + "\t" + text[1] + "\t"
+                                StockLineFreq.put(count,(text[0] + "\t" + text[2] + "\t" + text[1] + "\t"
                                         + variantPossibilities[0] + "\t" + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t"
                                         + "." + "\t" + "."+"t"));
                             }
@@ -821,26 +816,26 @@ public class FerretData extends SwingWorker<Integer, String> {
                             frqFileEmpty = false;
                             if(annotFiles.equals("no"))
                             {
-                            	StockLineFreq.add((text[0] + "\t" + text[2] + "\t" + text[1] + "\t" + variantPossibilities[0] + "\t"
+                            	StockLineFreq.put(count,(text[0] + "\t" + text[2] + "\t" + text[1] + "\t" + variantPossibilities[0] + "\t"
                                     + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t" + df.format(freqOne)+"\t"));
                             }
                             if(annotFiles.equals("def"))
                             {
-                            	StockLineFreq.add((text[0] + "\t" + text[2] + "\t" + text[1] + "\t" + variantPossibilities[0] + "\t"
+                            	StockLineFreq.put(count,(text[0] + "\t" + text[2] + "\t" + text[1] + "\t" + variantPossibilities[0] + "\t"
                                     + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t" + df.format(freqOne)+"\t")); // + "\t" + geneSymbol+ "\t" + geneId+ "\t" + fxnName + "\t" + proteinPos + "\t" + aa2 + aa1  + "\t" + proteinAcc);
                             }
                             if(annotFiles.equals("adv"))
                             {
-                            	StockLineFreq.add((text[0] + "\t" + text[2] + "\t" + text[1] + "\t" + variantPossibilities[0] + "\t"
+                            	StockLineFreq.put(count,(text[0] + "\t" + text[2] + "\t" + text[1] + "\t" + variantPossibilities[0] + "\t"
                                     + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t" + df.format(freqOne)+"\t")); // + "\t" + geneSymbol + "\t" + geneId+ "\t" + fxnName + "\t" + proteinPos + "\t" + aa2 + aa1  + "\t" + proteinAcc + "\t" + sift_score+ "\t" + sift_prediction+ "\t" + polyphen_score+ "\t" + polyphen_prediction);
                             }
                         }
                     }
                     //System.out.println("StockLineFreq[count] : " + StockLineFreq[count]);
                   
-   count++;
+                    count++;
                 }
-                System.out.println("count" + count);
+                System.out.println("count = " + count);
                 
                 
                 executor.shutdown();
@@ -881,14 +876,19 @@ public class FerretData extends SwingWorker<Integer, String> {
                  		frqWrite.newLine();
                      	}
                  }
-                 
-                 for (int i = 0; i < count; i++) {
-                	 if(StockLineFreq.size() < i){
-                		 System.out.println("StockLineFreq: idx "+ i);
-                	 }else if(CallerRunsPolicyDemo.StockLineAnnot.size() < i){
-                		 System.out.println("StockLineAnnot: idx "+ i);
-                	 }else
-                		 frqWrite.write(StockLineFreq.get(i)+ CallerRunsPolicyDemo.StockLineAnnot.get(i) + "\n");
+
+                System.out.println();
+
+                for (int i = 0; i < count; i++) {
+                	 if(StockLineFreq.size() < i || StockLineFreq.get(i) == null){
+                		 System.out.println("StockLineFreq: idx ("+ i +") not exist");
+                	 }
+                	 else if(CallerRunsPolicyDemo.StockLineAnnot.size() < i || CallerRunsPolicyDemo.StockLineAnnot == null){
+                		 System.out.println("StockLineAnnot: idx ("+ i +") not exist");
+                	 }
+                	 else{
+                         frqWrite.write(StockLineFreq.get(i)+ CallerRunsPolicyDemo.StockLineAnnot.get(i) + "\n");
+                     }
                  }
                 // this bracket marks the end of VCF reading
                 // Don't need to have MAF threshold here, because not written to genotypes array if MAF too low
