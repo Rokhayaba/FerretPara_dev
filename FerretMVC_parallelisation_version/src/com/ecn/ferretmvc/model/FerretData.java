@@ -66,8 +66,9 @@ public class FerretData extends SwingWorker<Integer, String> {
     //String[][] genotypes;
     //LinkedList<EspInfoObj> espData;
     //public static String[] text;
-    
     //private String [] StockLineFreq;
+	boolean allSNPsFound;
+	BufferedReader br;
     private Map<Integer, String> StockLineFreq;
 
 
@@ -194,12 +195,20 @@ public class FerretData extends SwingWorker<Integer, String> {
             LinkedList<String> endPos = new LinkedList<>();
             InputRegion[] queries = null;
             ArrayList<String> SNPsFound = new ArrayList<>();
-            boolean allSNPsFound = true;
-            BufferedReader br = null;
+            //boolean allSNPsFound = true;
+            allSNPsFound = true;
+            //BufferedReader br = null;
+            br = null;
             try {
+            	
+            	//Runnable Runner1 = new Runnable() { @Override public void run() {	
                 for (int i = 0; i < snpQueries.size(); i++) {
                 	System.out.println("snp queries" + snpQueries);
-                    URL urlLocation = new URL("https://www.ncbi.nlm.nih.gov/projects/SNP/snp_gene.cgi?connect=&rs=" + snpQueries.get(i));
+                    URL urlLocation;
+					
+						urlLocation = new URL("https://www.ncbi.nlm.nih.gov/projects/SNP/snp_gene.cgi?connect=&rs=" + snpQueries.get(i));
+						
+						//try {
                     br = new BufferedReader(new InputStreamReader(urlLocation.openStream()));
                     String currentString;
                     if (defaultHG) {
@@ -235,11 +244,24 @@ public class FerretData extends SwingWorker<Integer, String> {
                             chromosome.removeLast();
                         }
                         allSNPsFound = false;
-                    } else {
+                    }
+
+                    
+                    else {
                         SNPsFound.add(snpQueries.get(i));
                     }
                     br.close();
+//					} catch (IOException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
                 }
+//            	}
+//              };
+//              Thread thread1 = new Thread(Runner1);
+//              thread1.start();
+
+            
                 if (!allSNPsFound && !SNPsFound.isEmpty()) {//Partial list
                     String[] options = {"Yes", "No"};
 
@@ -291,13 +313,6 @@ public class FerretData extends SwingWorker<Integer, String> {
                     }
                 }
                 this.queries = queries;
-            } catch (FileNotFoundException e) {
-                // Either will occur if ncbi is down or if something is wrong with the input
-                JOptionPane.showMessageDialog(null, "Ferret was unable to retrieve any variants", "Error", JOptionPane.OK_OPTION);
-                return -2;
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, "Ferret was unable to retrieve any variants", "Error", JOptionPane.OK_OPTION);
-                return -2;
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Ferret was unable to retrieve any variants", "Error", JOptionPane.OK_OPTION);
                 return -2;
@@ -615,8 +630,8 @@ public class FerretData extends SwingWorker<Integer, String> {
                 BufferedWriter mapWrite = null, infoWrite = null, pedWrite = null, frqWrite = null;
                 boolean fileEmpty = true, frqFileEmpty = true;
                 
-                mapWrite = null; infoWrite = null; pedWrite = null; frqWrite = null;
-                fileEmpty = true; frqFileEmpty = true;
+//                mapWrite = null; infoWrite = null; pedWrite = null; frqWrite = null;
+//                fileEmpty = true; frqFileEmpty = true;
 
 
                 if (outputFiles == "all") {
@@ -673,8 +688,8 @@ public class FerretData extends SwingWorker<Integer, String> {
 
                    
                    
-                 worker = new CallerRunsPolicyDemo(count,Varid);
-                 executor.execute(worker);
+//                 worker = new AnnotThreading(count,Varid);
+//                 executor.execute(worker);
 
 
 
@@ -814,20 +829,25 @@ public class FerretData extends SwingWorker<Integer, String> {
                     } else {
                         if (variantPossibilities.length == 2 && freqOne >= MAF && freqZero >= MAF && freqOne <= MAFMax) {
                             frqFileEmpty = false;
+                            System.out.print("BECAUSE1 : " + count + "\t" +Varid);
                             if(annotFiles.equals("no"))
                             {
+                            	System.out.print("BECAUSE2 : " + count + "\t" +Varid);
                             	StockLineFreq.put(count,(text[0] + "\t" + text[2] + "\t" + text[1] + "\t" + variantPossibilities[0] + "\t"
                                     + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t" + df.format(freqOne)+"\t"));
                             }
                             if(annotFiles.equals("def"))
                             {
+                            	System.out.print("BECAUSE3 : " + count + "\t" +Varid);
                             	StockLineFreq.put(count,(text[0] + "\t" + text[2] + "\t" + text[1] + "\t" + variantPossibilities[0] + "\t"
                                     + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t" + df.format(freqOne)+"\t")); // + "\t" + geneSymbol+ "\t" + geneId+ "\t" + fxnName + "\t" + proteinPos + "\t" + aa2 + aa1  + "\t" + proteinAcc);
                             }
                             if(annotFiles.equals("adv"))
                             {
+                            	System.out.print("BECAUSE4 : " + count + "\t" + Varid);
                             	StockLineFreq.put(count,(text[0] + "\t" + text[2] + "\t" + text[1] + "\t" + variantPossibilities[0] + "\t"
-                                    + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t" + df.format(freqOne)+"\t")); // + "\t" + geneSymbol + "\t" + geneId+ "\t" + fxnName + "\t" + proteinPos + "\t" + aa2 + aa1  + "\t" + proteinAcc + "\t" + sift_score+ "\t" + sift_prediction+ "\t" + polyphen_score+ "\t" + polyphen_prediction);
+                                    + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t" + df.format(freqOne)+"\t"));
+                            	System.out.print("BECAUSEOFYOU-----> : " + StockLineFreq + "\t" + Varid + "\t" + count);
                             }
                         }
                     }
@@ -838,11 +858,11 @@ public class FerretData extends SwingWorker<Integer, String> {
                 System.out.println("count = " + count);
 
 
-                executor.shutdown();
-              	// Wait until all threads are finish
-              	while (!executor.isTerminated()) {
-
-              	}
+//                executor.shutdown();
+//              	// Wait until all threads are finish
+//              	while (!executor.isTerminated()) {
+//
+//              	}
             
               	
               	System.out.println("\nFinished all threads");
@@ -850,29 +870,24 @@ public class FerretData extends SwingWorker<Integer, String> {
                  freqFile.createNewFile();
                  frqWrite = new BufferedWriter(new FileWriter(freqFile));
                  if (retrieveESP) {
+                	 System.out.print("BECAUSE5 : " + count + "\t" +Varid);
                      frqWrite.write("CHROM\tVARIANT\tPOS\tALLELE1\tALLELE2\tNB_1KG_CHR\t1KG_A1_FREQ\tESP6500_EA_A1_FREQ\tESP6500_AA_A1_FREQ\tGENENAME\tGENEID\tFUNCTION\tPROTEINPOS\tAACHANGE\tPROTEINACC");
-                     //frqWrite.newLine();
-                     //frqWrite.write(StockLineFreq[count]);
-                     //frqWrite.write(CallerRunsPolicyDemo.StockLineAnnot[count]);
+                  
                      frqWrite.newLine();
                  } else {
                  	if(annotFiles.equals("no")){
+                 		System.out.print("BECAUSE6 : " + count + "\t" +Varid);
                      frqWrite.write("CHROM\tVARIANT\tPOS\tALLELE1\tALLELE2\tNB_CHR\t1KG_A1_FREQ\t1KG_A2_FREQ");
-                     //frqWrite.write(StockLineFreq[count]);
-                     //frqWrite.write(CallerRunsPolicyDemo.StockLineAnnot[count]);
                      frqWrite.newLine();
                  	}
                  	if(annotFiles.equals("def")){
+                 		System.out.print("BECAUSE7 : " + count + "\t" +Varid);
                          frqWrite.write("CHROM\tVARIANT\tPOS\tALLELE1\tALLELE2\tNB_CHR\t1KG_A1_FREQ\t1KG_A2_FREQ\tGENENAME\tGENEID\tFUNCTION\tPROTEINPOS\tAACHANGE\tPROTEINACC");
-                         //frqWrite.write(StockLineFreq[count]);
-                         //frqWrite.write(CallerRunsPolicyDemo.StockLineAnnot[count]);
                          frqWrite.newLine();
                      	}
                  	if(annotFiles.equals("adv")){
-
+                 		System.out.print("BECAUSE8 : " + count + "\t" +Varid);
                  		frqWrite.write("CHROM\tVARIANT\tPOS\tALLELE1\tALLELE2\tNB_CHR\t1KG_A1_FREQ\t1KG_A2_FREQ\tGENENAME\tGENEID\tFUNCTION\tPROTEINPOS\tAACHANGE\tPROTEINACC\tSIFT_SCORE\tSIFT_PREDICTION\tPOLYPHEN_SCORE\tPOLYPHEN_PREDICTION");
-                 		//frqWrite.write(StockLineFreq[count]);
-                        //frqWrite.write(CallerRunsPolicyDemo.StockLineAnnot[count]);
                  		frqWrite.newLine();
                      	}
                  }
@@ -880,15 +895,16 @@ public class FerretData extends SwingWorker<Integer, String> {
                 System.out.println();
 
                 for (int i = 0; i < count; i++) {
-                	 if(StockLineFreq.size() < i || StockLineFreq.get(i) == null){
-                		 System.out.println("StockLineFreq: idx ("+ i +") not exist");
-                	 }
-                	 else if(CallerRunsPolicyDemo.StockLineAnnot.size() < i || CallerRunsPolicyDemo.StockLineAnnot == null){
-                		 System.out.println("StockLineAnnot: idx ("+ i +") not exist");
-                	 }
-                	 else{
-                         frqWrite.write(StockLineFreq.get(i)+ CallerRunsPolicyDemo.StockLineAnnot.get(i) + "\n");
-                     }
+//                	 if(StockLineFreq.size() < i-1 || StockLineFreq.get(i) == null){
+//                		 System.out.println("StockLineFreq: idx ("+ i +") not exist");
+//                	 }
+//                	 else if(AnnotThreading.StockLineAnnot.size() < i-1 || AnnotThreading.StockLineAnnot == null){
+//                		 System.out.println("StockLineAnnot: idx ("+ i +") not exist");
+//                	 }
+//                	 else{
+//                		 System.out.println("StockLineFreq ----->" + StockLineFreq.get(i));
+                         frqWrite.write(StockLineFreq.get(i) + "\n"); //+ AnnotThreading.StockLineAnnot.get(i)
+//                     }
                  }
                 // this bracket marks the end of VCF reading
                 // Don't need to have MAF threshold here, because not written to genotypes array if MAF too low
@@ -1022,8 +1038,11 @@ public class FerretData extends SwingWorker<Integer, String> {
 
     public static String getPeopleStringPhase3(String chrNum) {
         // helper method for the below method
-        String s = null;
+      //Runnable Runner1 = new Runnable() { @Override public void run() {
+    	  String s = null;
+    	  //final Integer innerMi = new Integer(mi);
         try {
+        	
             //String webAddress = "ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/ALL.chr" + chrNum + ".phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz";
             String webAddress = "http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr" + chrNum + ".phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz";
             // Prepares objects for file writing
@@ -1033,14 +1052,21 @@ public class FerretData extends SwingWorker<Integer, String> {
             while (!s.contains("CHROM")) {
                 s = tr.readLine();
             }
+            
         } catch (IOException | RuntimeException e) {
         }
+//    	}
+//      };
+//      Thread thread1 = new Thread(Runner1);
+//      thread1.start();
         return s;
+
     }
 
     public static String getPeopleStringPhase3GRCh38(String chrNum) {
         // helper method for the below method
         String s = null;
+     // Runnable Runner1 = new Runnable() { @Override public void run() {
         try {
             String webAddress = "http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/supporting/GRCh38_positions/ALL.chr" + chrNum + ".phase3_shapeit2_mvncall_integrated_v3plus_nounphased.rsID.genotypes.GRCh38_dbSNP_no_SVs.vcf.gz";
             // Prepares objects for file writing
@@ -1052,12 +1078,19 @@ public class FerretData extends SwingWorker<Integer, String> {
             }
         } catch (IOException | RuntimeException e) {
         }
+        
+//    	}
+//      };
+//      Thread thread1 = new Thread(Runner1);
+//      thread1.start();
         return s;
     }
 
     public static String getPeopleStringPhase1(String chrNum) {
         // helper method for the below method
-        String s = null;
+    	String s = null;
+    	// Runnable Runner1 = new Runnable() { @Override public void run() {
+    		 
         try {
             //ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20110521/
             String webAddress = "http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20110521/ALL.chr" + chrNum + ".phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz";
@@ -1067,8 +1100,14 @@ public class FerretData extends SwingWorker<Integer, String> {
             while (!s.contains("CHROM")) {
                 s = tr.readLine();
             }
+            
         } catch (IOException | RuntimeException e) {
         }
+        
+//    	}
+//      };
+//      Thread thread1 = new Thread(Runner1);
+//      thread1.start();
         return s;
     }
 

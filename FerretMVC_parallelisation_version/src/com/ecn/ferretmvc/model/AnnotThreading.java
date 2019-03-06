@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 
 
 
-public class CallerRunsPolicyDemo implements Runnable{
+public class AnnotThreading implements Runnable{
 //	public static URL url;
 //	public static URL urlvep;
 //	public String [] Varlist;
@@ -37,10 +37,10 @@ public class CallerRunsPolicyDemo implements Runnable{
 	private int cpt;
 	private String Varid;
 	 
-		public CallerRunsPolicyDemo (int cpt,String Varid) {
+		public AnnotThreading (int cpt,String Varid) {
 			
-		 if(CallerRunsPolicyDemo.StockLineAnnot == null)
-			 CallerRunsPolicyDemo.StockLineAnnot = new HashMap<>();
+		 if(AnnotThreading.StockLineAnnot == null)
+			 AnnotThreading.StockLineAnnot = new HashMap<>();
 		 
 		 this.cpt = cpt; 
 		 this.Varid = Varid;
@@ -87,101 +87,101 @@ public class CallerRunsPolicyDemo implements Runnable{
 //            }
         	
         	
-        	try {
-            	System.out.println("\tCe qu'il y'a dans varid dans le call run\t" + Varid);
-                URL urlLocation = new URL("https://www.ncbi.nlm.nih.gov/projects/SNP/snp_gene.cgi?connect=&rs=" + Varid);
-                String server = "https://rest.ensembl.org";
-    		    String ext = "/vep/human/id/rs" + Varid+ "?content-type=application/json";
-    		    URL urlvep = new URL(server + ext);
-
-    		    br = null;
-    		    brvep = null;
-    		    URLConnection connection = urlvep.openConnection();
-    		    HttpURLConnection httpConnection = (HttpURLConnection)connection;
-       		
-    		    httpConnection.setRequestProperty("Content-Type", "application/json");
-    		    	
-    		    try{
-    		    	
-    		    	br = new BufferedReader(new InputStreamReader(urlLocation.openStream()));
-
-                
-                String currentString;
-
-                    while ((currentString = br.readLine()) != null  && !currentString.contains("\"mrnaAcc\" : ")) 
-                    {
-                        if (currentString.contains("\"geneSymbol\"")) {
-                        	geneSymbol = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-                        	System.out.print("\tgeneSymbol" + geneSymbol);
-                        	 if (geneSymbol.equals("")) {
-                             	geneSymbol = ".";
-                             }
-                    }
-                       
-                        
-                        if (currentString.contains("\"geneId\"")) {
-                        	geneId = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-                        	System.out.print("\tgeneId" + geneId);
-                        	if (geneId.equals("")) {
-                             	geneId = ".";
-                             }
-                        }
-                       
-                        
-                        
-                        if (currentString.contains("\"proteinPos\"")) {
-                        	proteinPos = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-                        	System.out.print("\tproteinPos" + proteinPos);
-                        	if (proteinPos.equals("")) {
-                             	proteinPos = ".";
-                             }
-                        	
-                        	}
-                        	
-                        
-                        if (currentString.contains("\"proteinAcc\"")) {
-                        	proteinAcc = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-                        	System.out.print("\tproteinAcc" + proteinAcc);
-                        	if (proteinAcc.equals("")) {
-                            	proteinAcc = ".";
-                            }
-                        }
-                        
-                    
-                        if (currentString.contains("\"aaCode\"") && passee1 == false) {
-                        	aa1 = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-                        	System.out.print("\t aacode1" + aa1);
-                        	if (aa1.equals("")) {
-                        		aa1 = ".";
-                             }
-                        	
-                        	passee1 = true;
-                        }
-                        if (currentString.contains("\"aaCode\"") && passee1 == true) {
-                        	
-                        	aa2 = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-                        	
-                        	System.out.print("\t aacode2" + aa2);
-                        	
-                        	if (aa2.equals("")) {
-                        		aa2 = ".";
-                            
-                             }
-                        
-                        }
-                        
-                       
-                        if (currentString.contains("\"fxnName\"") && passee == false) {
-                        	
-                        	fxnName = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-                        	System.out.print("\tfxnName" + fxnName);
-                        	passee=true;
-                        	if (fxnName.equals("")) {
-                             	fxnName = ".";
-                             }
-                        	
-                        }
-                    }
+//        	try {
+//            	System.out.println("\tCe qu'il y'a dans varid dans le call run\t" + Varid);
+//                URL urlLocation = new URL("https://www.ncbi.nlm.nih.gov/projects/SNP/snp_gene.cgi?connect=&rs=" + Varid);
+//                String server = "https://rest.ensembl.org";
+//    		    String ext = "/vep/human/id/rs" + Varid+ "?content-type=application/json";
+//    		    URL urlvep = new URL(server + ext);
+//
+//    		    br = null;
+//    		    brvep = null;
+//    		    URLConnection connection = urlvep.openConnection();
+//    		    HttpURLConnection httpConnection = (HttpURLConnection)connection;
+//       		
+//    		    httpConnection.setRequestProperty("Content-Type", "application/json");
+//    		    	
+//    		    try{
+//    		    	
+//    		    	br = new BufferedReader(new InputStreamReader(urlLocation.openStream()));
+//
+//                
+//                String currentString;
+//
+//                    while ((currentString = br.readLine()) != null  && !currentString.contains("\"mrnaAcc\" : ")) 
+//                    {
+//                        if (currentString.contains("\"geneSymbol\"")) {
+//                        	geneSymbol = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
+//                        	System.out.print("\tgeneSymbol" + geneSymbol);
+//                        	 if (geneSymbol.equals("")) {
+//                             	geneSymbol = ".";
+//                             }
+//                    }
+//                       
+//                        
+//                        if (currentString.contains("\"geneId\"")) {
+//                        	geneId = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
+//                        	System.out.print("\tgeneId" + geneId);
+//                        	if (geneId.equals("")) {
+//                             	geneId = ".";
+//                             }
+//                        }
+//                       
+//                        
+//                        
+//                        if (currentString.contains("\"proteinPos\"")) {
+//                        	proteinPos = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
+//                        	System.out.print("\tproteinPos" + proteinPos);
+//                        	if (proteinPos.equals("")) {
+//                             	proteinPos = ".";
+//                             }
+//                        	
+//                        	}
+//                        	
+//                        
+//                        if (currentString.contains("\"proteinAcc\"")) {
+//                        	proteinAcc = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
+//                        	System.out.print("\tproteinAcc" + proteinAcc);
+//                        	if (proteinAcc.equals("")) {
+//                            	proteinAcc = ".";
+//                            }
+//                        }
+//                        
+//                    
+//                        if (currentString.contains("\"aaCode\"") && passee1 == false) {
+//                        	aa1 = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
+//                        	System.out.print("\t aacode1" + aa1);
+//                        	if (aa1.equals("")) {
+//                        		aa1 = ".";
+//                             }
+//                        	
+//                        	passee1 = true;
+//                        }
+//                        if (currentString.contains("\"aaCode\"") && passee1 == true) {
+//                        	
+//                        	aa2 = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
+//                        	
+//                        	System.out.print("\t aacode2" + aa2);
+//                        	
+//                        	if (aa2.equals("")) {
+//                        		aa2 = ".";
+//                            
+//                             }
+//                        
+//                        }
+//                        
+//                       
+//                        if (currentString.contains("\"fxnName\"") && passee == false) {
+//                        	
+//                        	fxnName = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
+//                        	System.out.print("\tfxnName" + fxnName);
+//                        	passee=true;
+//                        	if (fxnName.equals("")) {
+//                             	fxnName = ".";
+//                             }
+//                        	
+//                        }
+//                    }
                   //br.close();
 
 // 	           ***********ICI COMMENCE L'EXTRACTION VEP*************
@@ -276,16 +276,16 @@ public class CallerRunsPolicyDemo implements Runnable{
 //						 
 //					   }
 
-                    CallerRunsPolicyDemo.StockLineAnnot.put(this.cpt, tst + "\t" +geneSymbol + "\t" + geneId+ "\t" + fxnName + "\t" + proteinPos + "\t" + aa2 + aa1  + "\t" + proteinAcc + "\t" + sift_score+ "\t" + sift_prediction+ "\t" + polyphen_score+ "\t" + polyphen_prediction);
+                    AnnotThreading.StockLineAnnot.put(this.cpt, Varid + "\t" +geneSymbol + "\t" + geneId+ "\t" + fxnName + "\t" + proteinPos + "\t" + aa2 + aa1  + "\t" + proteinAcc + "\t" + sift_score+ "\t" + sift_prediction+ "\t" + polyphen_score+ "\t" + polyphen_prediction);
                     
 //    			} catch (IOException e) {
 //					// TODO Auto-generated catch block
 //					e.printStackTrace();
-					}catch (Exception e2) {
-	              	     e2.printStackTrace();
-                    }
-        	} catch (IOException e) {
-            }
+//					}catch (Exception e2) {
+//	              	     e2.printStackTrace();
+//                    }
+//        	} catch (IOException e) {
+//            }
 			
 		}
 
