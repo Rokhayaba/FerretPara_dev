@@ -19,6 +19,7 @@ import org.json.simple.parser.ParseException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,15 +36,17 @@ public class AnnotThreading implements Runnable{
 //	public static URL urlvep;
 //	public String [] Varlist;
 	//public static volatile String [] test;
-	public static volatile Map<Integer, String> StockLineAnnot;
+	public static volatile Map<Integer, String> StockLineAnnotdef;
+	public static volatile Map<Integer, String> StockLineAnnotadv;
 	private int cpt;
 	private String Varid;
 	private Connection conn;
-	 
+	
 		public AnnotThreading (int cpt,String Varid,Connection conn) {
 			
-		 if(AnnotThreading.StockLineAnnot == null)
-			 AnnotThreading.StockLineAnnot = new HashMap<>();
+		 if(AnnotThreading.StockLineAnnotdef == null && AnnotThreading.StockLineAnnotadv == null )
+			 AnnotThreading.StockLineAnnotdef = new HashMap<>();
+		 AnnotThreading.StockLineAnnotadv = new HashMap<>();
 		 
 		 this.cpt = cpt; 
 		 this.Varid = Varid;
@@ -52,14 +55,14 @@ public class AnnotThreading implements Runnable{
 
 		@Override
 		public void run() {
-			 String geneSymbol = null;
-			 String geneId = null;
-			 String proteinPos = null;
-			 String proteinAcc = null;
-			 String fxnName = null;
-			 String aa1 = null;
-			 String aa2 = null;
-			 String protein_end = null;
+			 String geneSymbol = "unavailable";
+			 String geneId = "unavailable";
+			 String proteinPos = "unavailable";
+			 String proteinAcc = "unavailable";
+			 String fxnName = "unavailable";
+			 String aa1 = "lable";
+			 String aa2 = "unavai";
+			 String protein_end = "unavailable";
 			 String sift_score = null;
 			 String sift_score1 = null;
 			 String polyphen_score = null;
@@ -74,21 +77,35 @@ public class AnnotThreading implements Runnable{
         	 BufferedReader brvep = null;
 				String regulomeDB_score = null;
 				String rgdb_score_signification = null;
+				String SIFT = null;
+				String SIFT_P = null;
+				String Polyphen = null;
+				String Polyphen_P = null;
+				String Provean = null;
+				String Provean_P = null;
+				String CADD = null;
+		
+				
 
 
-         	   System.out.print("Varid threading : " + Varid);
+         	  
 
         	
         	
         	try {
-            	System.out.println("\tCe qu'il y'a dans varid dans le call run\t" + Varid);
-                URL urlLocation = new URL("https://www.ncbi.nlm.nih.gov/projects/SNP/snp_gene.cgi?connect=&rs=" + Varid);
+            	
+                URL urlLocation = new URL("https://www.ncbi.nlm.nih.gov/projects/SNP/snp_gene.cgi?connect=&rs=" + Varid +"&api_key=21a24e28baf4d0ce4a9eca9b9c8210286909");
 //                String server = "https://rest.ensembl.org";
 //    		    String ext = "/vep/human/id/rs" + Varid+ "?content-type=application/json";
 //    		    URL urlvep = new URL(server + ext);
-
+    		    URLConnection connection = urlLocation.openConnection();
+    		    //connection.setConnectTimeout(1000);
+//    		    HttpURLConnection httpConnection = (HttpURLConnection)connection;
+//    		    httpConnection.setConnectionTimeout( httpParameters, 20000 );
+//    		    httpConnection.setSoTimeout( httpParameters, 42000 );
     		    br = null;
 //    		    brvep = null;
+    		   
 //    		    URLConnection connection = urlvep.openConnection();
 //    		    HttpURLConnection httpConnection = (HttpURLConnection)connection;
 //       		
@@ -105,16 +122,15 @@ public class AnnotThreading implements Runnable{
                     {
                         if (currentString.contains("\"geneSymbol\"")) {
                         	geneSymbol = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-                        	System.out.print("\tgeneSymbol" + geneSymbol);
                         	 if (geneSymbol.equals("")) {
                              	geneSymbol = ".";
                              }
+                        	 
                     }
                        
                         
                         if (currentString.contains("\"geneId\"")) {
                         	geneId = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-                        	System.out.print("\tgeneId" + geneId);
                         	if (geneId.equals("")) {
                              	geneId = ".";
                              }
@@ -124,7 +140,6 @@ public class AnnotThreading implements Runnable{
                         
                         if (currentString.contains("\"proteinPos\"")) {
                         	proteinPos = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-                        	System.out.print("\tproteinPos" + proteinPos);
                         	if (proteinPos.equals("")) {
                              	proteinPos = ".";
                              }
@@ -134,7 +149,6 @@ public class AnnotThreading implements Runnable{
                         
                         if (currentString.contains("\"proteinAcc\"")) {
                         	proteinAcc = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-                        	System.out.print("\tproteinAcc" + proteinAcc);
                         	if (proteinAcc.equals("")) {
                             	proteinAcc = ".";
                             }
@@ -143,7 +157,6 @@ public class AnnotThreading implements Runnable{
                     
                         if (currentString.contains("\"aaCode\"") && passee1 == false) {
                         	aa1 = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-                        	System.out.print("\t aacode1" + aa1);
                         	if (aa1.equals("")) {
                         		aa1 = ".";
                              }
@@ -153,9 +166,6 @@ public class AnnotThreading implements Runnable{
                         if (currentString.contains("\"aaCode\"") && passee1 == true) {
                         	
                         	aa2 = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-                        	
-                        	System.out.print("\t aacode2" + aa2);
-                        	
                         	if (aa2.equals("")) {
                         		aa2 = ".";
                             
@@ -167,7 +177,6 @@ public class AnnotThreading implements Runnable{
                         if (currentString.contains("\"fxnName\"") && passee == false) {
                         	
                         	fxnName = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-                        	System.out.print("\tfxnName" + fxnName);
                         	passee=true;
                         	if (fxnName.equals("")) {
                              	fxnName = ".";
@@ -292,11 +301,51 @@ public class AnnotThreading implements Runnable{
 						regulomeDB_score = "not in the base";
 						rgdb_score_signification = "(regulomeDB may not be up to date)";
 					}
+					
+					
+//					ResultSet result = conn.createStatement()
+//							.executeQuery("SELECT id FROM scoressnps FETCH NEXT 1000 ROWS ONLY "); //'"+Varid+"'";
+//					while(result.next()){
+//					Test.add(result.getString("id"));
+//					System.out.println("TEST"+Test);
+//					}
+						//String [] test = {"rs201864858", "rs201864858", "rs372723457", "rs372723457", "rs11553019", "rs11553019", "rs139017158", "rs139017158", "rs149964072", "rs149964072", "rs11553018", "rs11553018", "rs141052988", "rs141052988", "rs145664491", "rs145664491", "rs148306581", "rs148306581", "rs74558623", "rs74558623", "rs79377094", "rs79377094", "rs201610844", "rs201610844", "rs375850117", "rs375850117", "rs201342263", "rs201342263", "rs201892015", "rs201892015", "rs115595484", "rs115595484", "rs367663038", "rs367663038", "rs199853927", "rs199853927", "rs200757617", "rs200757617", "rs138567361", "rs138567361", "rs369805092", "rs369805092", "rs200178716", "rs200178716", "rs150755193", "rs150755193", "rs111662059", "rs111662059", "rs376725006", "rs376725006", "rs375747724", "rs375747724", "rs200476766", "rs200476766", "rs375678465", "rs375678465", "rs370150531", "rs370150531", "rs75915990", "rs75915990", "rs141372323", "rs141372323", "rs121909386", "rs121909386", "rs371779195", "rs371779195", "rs190323395", "rs190323395", "rs375833021", "rs375833021", "rs149516753", "rs149516753", "rs140753322", "rs140753322", "rs183437359", "rs183437359", "rs367727112", "rs367727112", "rs370770872", "rs370770872", "rs200241388", "rs200241388", "rs143432523", "rs143432523", "rs370731821", "rs370731821", "rs201280490", "rs201280490", "rs372770283", "rs372770283", "rs199753491", "rs199753491", "rs182944047", "rs182944047", "rs200892725", "rs200892725", "rs372546647", "rs372546647", "rs112200975", "rs112200975", "rs367763475", "rs367763475", "rs150890799", "rs150890799", "rs140162687", "rs140162687", "rs374218650", "rs374218650", "rs149456198", "rs149456198", "rs141485845", "rs141485845", "rs371085455", "rs371085455", "rs368955427", "rs368955427", "rs376644821", "rs376644821", "rs368720992", "rs368720992", "rs191962962"};
+						
+						
+					
+					//System.out.println("resdbsnp" + resdbsnp);
+					//ResultSetMetaData resultdbsnp = resdbsnp.getMetaData();
+					//ResultSetMetaData resultMeta1 = resultsubgroup.getMetaData();
+					ResultSet resdbsnp = conn.createStatement()
+							.executeQuery("SELECT * FROM scoressnps WHERE id = 'rs" + Varid + "'"); //'"+Varid+"'"
 
-                    AnnotThreading.StockLineAnnot.put(this.cpt,geneSymbol + "\t" + geneId+ "\t" + fxnName + "\t" + proteinPos + "\t" + aa2 + aa1  + "\t" + proteinAcc+ "\t" + sift_score + "\t" + sift_prediction + "\t"
-							+ polyphen_score + "\t" + polyphen_prediction+ "\t" + regulomeDB_score + "\t"
-							+ rgdb_score_signification);
-                    
+					if (resdbsnp.next()) {
+						
+						SIFT = resdbsnp.getString("SIFT_score");
+						SIFT_P = resdbsnp.getString("SIFT_pred");
+						Polyphen = resdbsnp.getString("Polyphen2_HDIV_score");
+						Polyphen_P = resdbsnp.getString("Polyphen2_HDIV_pred");
+						Provean = resdbsnp.getString("PROVEAN_score");
+						Provean_P = resdbsnp.getString("PROVEAN_pred");
+					CADD = resdbsnp.getString("CADD_phred");
+						}
+					else {
+						SIFT = ".";
+						SIFT_P = ".";
+						Polyphen = ".";
+						Polyphen_P = ".";
+						Provean = ".";
+						Provean_P = ".";
+					CADD = ".";
+					}
+					
+					
+					
+					
+
+                    AnnotThreading.StockLineAnnotdef.put(this.cpt,geneSymbol + "\t" + geneId+ "\t" + fxnName + "\t" + proteinPos + "\t" + aa2 + aa1  + "\t" + proteinAcc);
+                    AnnotThreading.StockLineAnnotadv.put(this.cpt,"\t" +regulomeDB_score + "\t" + rgdb_score_signification+ "\t" + SIFT + "\t" + SIFT_P + "\t" + Polyphen + "\t" + Polyphen_P + "\t" 
+                    + Provean + "\t" + Provean_P + "\t" + CADD);
     			} catch (IOException e) {
     				
 					e.printStackTrace();

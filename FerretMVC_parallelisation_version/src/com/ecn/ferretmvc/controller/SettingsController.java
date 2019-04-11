@@ -52,6 +52,7 @@ public class SettingsController implements ActionListener, ChangeListener, Prope
                 gui.getadvanced_annot().setEnabled(true);
                 gui.getHtmlFileButton().setEnabled(true);
                 gui.getHtmlFileButton().setSelected(true);
+                gui.getdownloadHaploButton().setEnabled(true);
                 break;
             case "freqFileButton":
                 if (!(gui.getVersion38Button().isSelected())) {
@@ -62,6 +63,7 @@ public class SettingsController implements ActionListener, ChangeListener, Prope
                 gui.getadvanced_annot().setEnabled(true);
                 gui.getHtmlFileButton().setEnabled(true);
                 gui.getHtmlFileButton().setSelected(true);
+                gui.getdownloadHaploButton().setEnabled(true);
                 break;
             case "vcfFilesButton":
                 if (gui.getEspMAF().isSelected()) {
@@ -75,12 +77,14 @@ public class SettingsController implements ActionListener, ChangeListener, Prope
                 gui.getdefault_annot().setEnabled(false);
                 gui.getadvanced_annot().setEnabled(false);
                 gui.getHtmlFileButton().setEnabled(false);
+                gui.getdownloadHaploButton().setEnabled(true);
                 break;
             case "version19Button":
                 gui.getPhase1Button().setEnabled(true);
                 if (!(gui.getVcfFileButton().isSelected())) {
                     gui.getEspMAF().setEnabled(true);
                 }
+                gui.getdownloadHaploButton().setEnabled(true);
                 break;
             case "version38Button":
                 gui.getPhase3Button().setSelected(true);
@@ -89,6 +93,7 @@ public class SettingsController implements ActionListener, ChangeListener, Prope
                     gui.getEspMAF().setSelected(false);
                 }
                 gui.getEspMAF().setEnabled(false);
+                gui.getdownloadHaploButton().setEnabled(true);
                 break;
                 
             case "settingsCancel":
@@ -110,6 +115,7 @@ public class SettingsController implements ActionListener, ChangeListener, Prope
                 gui.getAllFilesButton().setSelected(gui.getCurrFileOut()[0] == GUI.fileOutput.ALL);
                 gui.getFreqFileButton().setSelected(gui.getCurrFileOut()[0] == GUI.fileOutput.FRQ);
                 gui.getHtmlFileButton().setSelected(gui.isHtmlFile());
+                gui.getdownloadHaploButton().setSelected(gui.isdownloadHaplo());
                 gui.getVcfFileButton().setSelected(gui.getCurrFileOut()[0] == GUI.fileOutput.VCF);
                 gui.getVcfFileButton().setEnabled(true);
                 gui.getno_annot().setSelected(gui.getCurrAnnot()[0] == GUI.annotOutput.NO);
@@ -146,6 +152,11 @@ public class SettingsController implements ActionListener, ChangeListener, Prope
                     gui.setHtmlFile(true);
                 } else {
                     gui.setHtmlFile(false);
+                }
+                if (gui.getdownloadHaploButton().isSelected()) {
+                    gui.setdownloadHaplo(true);
+                } else {
+                    gui.setdownloadHaplo(false);
                 }
                 if (gui.getno_annot().isSelected()) {
                     gui.getCurrAnnot()[0] = GUI.annotOutput.NO;

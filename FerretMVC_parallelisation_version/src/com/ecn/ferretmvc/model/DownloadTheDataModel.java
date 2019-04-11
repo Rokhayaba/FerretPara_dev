@@ -110,7 +110,7 @@ public class DownloadTheDataModel extends Observable {
 	    	// Connecting into the Database
 	      Class.forName("org.postgresql.Driver");
 	      String url = "jdbc:postgresql://localhost:5432/Ferret_data";
-
+	     //String url = "jdbc:postgresql://postgresql-ferret.alwaysdata.net:5432/ferret_hladata";
 	      String user = "postgres";
 
 	      String passwd = "Ferret.1";
@@ -511,7 +511,7 @@ pedfile.delete();
 	    }
     
 	}
-    public void performSearchAndDownload(GUI gui, boolean boolHaplo) {
+    public void performSearchAndDownload(GUI gui) {
         //Add selected populations
         final long startTime = System.nanoTime();
         ArrayList<CharSequence> populations = new ArrayList<>();
@@ -956,6 +956,8 @@ pedfile.delete();
                     }
                     boolean htmlOutput = gui.isHtmlFile();
                     System.out.println("htmloutput 1 true =" +htmlOutput);
+                    boolean downloadHaplo = gui.isdownloadHaplo();
+                    System.out.println("downloadHaplo 1 true =" + downloadHaplo);
                     String outputannot = null;
                     switch (gui.getCurrAnnot()[0]) {
                     case NO:
@@ -978,8 +980,8 @@ pedfile.delete();
                         webAddress = "http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/supporting/GRCh38_positions/ALL.chr$.phase3_shapeit2_mvncall_integrated_v3plus_nounphased.rsID.genotypes.GRCh38_dbSNP_no_SVs.vcf.gz";
                     }
 //LOCUS
-                    FerretData currFerretWorker = new FerretData(queries, populations, gui.getFileNameAndPath(), getESP, gui.getProgressText(), webAddress, gui.getMafThreshold()[0], gui.getMafThresholdMax()[0], gui.getEspMAFBoolean()[0], output, outputannot,htmlOutput);
-                    currFerretWorker.setHaplo(boolHaplo);
+                    FerretData currFerretWorker = new FerretData(queries, populations, gui.getFileNameAndPath(), getESP, gui.getProgressText(), webAddress, gui.getMafThreshold()[0], gui.getMafThresholdMax()[0], gui.getEspMAFBoolean()[0], output, outputannot,htmlOutput, downloadHaplo);
+                    //currFerretWorker.setHaplo(boolHaplo);
 
                     currFerretWorker.addPropertyChangeListener((PropertyChangeEvent evt) -> {
                         switch (evt.getPropertyName()) {
@@ -1291,6 +1293,8 @@ pedfile.delete();
                     String outputannot = null;
                     boolean htmlOutput = gui.isHtmlFile();
                     System.out.println("htmloutput 2 true =" +htmlOutput);
+                    boolean downloadHaplo = gui.isdownloadHaplo();
+                    System.out.println("downloadHaplo 2 true =" +downloadHaplo);
                  
                     switch (gui.getCurrAnnot()[0]) {
                     case NO:
@@ -1320,8 +1324,8 @@ pedfile.delete();
                         geneQueryType = "geneID";
                     }
 //GENE
-                    FerretData currFerretWorker = new FerretData(geneQueryType, geneListArray, populations, gui.getFileNameAndPath(), getESP, gui.getProgressText(), webAddress, gui.getMafThreshold()[0], gui.getMafThresholdMax()[0], gui.getEspMAFBoolean()[0], output, gui.getDefaultHG()[0], geneWindowSelected, Integer.parseInt(geneWindowSize), 0, outputannot, htmlOutput);
-                    currFerretWorker.setHaplo(boolHaplo);
+                    FerretData currFerretWorker = new FerretData(geneQueryType, geneListArray, populations, gui.getFileNameAndPath(), getESP, gui.getProgressText(), webAddress, gui.getMafThreshold()[0], gui.getMafThresholdMax()[0], gui.getEspMAFBoolean()[0], output, gui.getDefaultHG()[0], geneWindowSelected, Integer.parseInt(geneWindowSize), 0, outputannot, htmlOutput, downloadHaplo);
+                    //currFerretWorker.setHaplo(boolHaplo);
 
                     currFerretWorker.addPropertyChangeListener((PropertyChangeEvent evt) -> {
                         switch (evt.getPropertyName()) {
@@ -1635,6 +1639,8 @@ pedfile.delete();
                     String outputannot = null;
                     boolean htmlOutput = gui.isHtmlFile();
                     System.out.println("htmloutput 3 true =" +htmlOutput);
+                    boolean downloadHaplo = gui.isdownloadHaplo();
+                    System.out.println("downloadHaplo 3 true =" +downloadHaplo);
                     switch (gui.getCurrAnnot()[0]) {
                         case NO:
                             outputannot = "no";
@@ -1658,8 +1664,8 @@ pedfile.delete();
                     }
 //VARIANT
                     FerretData currFerretWorker = new FerretData("SNP", snpListArray, populations, gui.getFileNameAndPath(), getESP, gui.getProgressText(), webAddress, gui.getMafThreshold()[0], gui.getMafThresholdMax()[0],
-                            gui.getEspMAFBoolean()[0], output, gui.getDefaultHG()[0], snpWindowSelected, Integer.parseInt(snpWindowSize), outputannot, htmlOutput);
-                    currFerretWorker.setHaplo(boolHaplo);
+                            gui.getEspMAFBoolean()[0], output, gui.getDefaultHG()[0], snpWindowSelected, Integer.parseInt(snpWindowSize), outputannot, htmlOutput, downloadHaplo);
+                    //currFerretWorker.setHaplo(boolHaplo);
                     currFerretWorker.addPropertyChangeListener((PropertyChangeEvent evt) -> {
                         switch (evt.getPropertyName()) {
                             case "progress":
@@ -1966,7 +1972,7 @@ pedfile.delete();
         //System.out.print("\n nb_zero"+nb_zero);
         while (line3 != null)
         {
-        	System.out.print("je rentre dans le while");
+        	
         	for (int i = 0; i < id_snp.size(); i++) {
         			//System.out.print("\n i \t" +id_snp.get(i) + "\t");
         			

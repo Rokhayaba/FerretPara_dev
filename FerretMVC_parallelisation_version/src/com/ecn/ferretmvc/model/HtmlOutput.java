@@ -222,11 +222,15 @@ public class HtmlOutput {
 
 			// Only advanced notifications
 			if (annot.equals("adv")) {
-				write("<th>Sift score</th>", 5);
-				write("<th>Sift prediction</th>", 5);
-				write("<th>Polyphen score</th>", 5);
-				write("<th>Polyphen prediction</th>", 5);
 				write("<th>RegulomeDB score</th>", 5);
+				//write("<th>RegulomeDB prediction</th>", 5);
+				write("<th>Sift score</th>", 5);
+				//write("<th>Sift prediction</th>", 5);
+				write("<th>Polyphen score</th>", 5);
+				//write("<th>Polyphen prediction</th>", 5);
+				write("<th>Provean score</th>", 5);
+				//write("<th>Provean prediction</th>", 5);
+				write("<th>CADD score</th>", 5);
 			}
 
 			write("</tr>", 4);
@@ -257,11 +261,15 @@ public class HtmlOutput {
 		// Copies the frq file into an html table
 		if (frqReader != null) {
 			try {
+				try{
 				// The first line contains the head of the array and is not required here.
 				str = frqReader.readLine();
 				str = frqReader.readLine();
 				System.out.println("str :" + str );
-
+				String vert = "vert";
+				String red = "red";
+				String orange = "orange";
+			
 				
 
 				while (str != null) {
@@ -276,27 +284,37 @@ public class HtmlOutput {
 							write("<td><a href = \"https://www.ncbi.nlm.nih.gov/snp/" + s + "\">" + s + "</td>", 5);
 							break;
 						case 8:
-							write("<td><a href = \"https://www.ncbi.nlm.nih.gov/gene/" + strSplit[9] + "\">" + s
-									+ "</td>", 5);
-							break;
-						case 9:
-							write("<td><a href = \"https://www.ncbi.nlm.nih.gov/gene/" + s + "\">" + s + "</td>", 5);
-							break;
-						case 14:
-							if (annot.equals("def")) {
-								write("<td><a href = \"https://www.ncbi.nlm.nih.gov/gene/" + strSplit[9] + "\"></td>",
-										5);
-							} else {
+							if (s.equals("unavailable")){
 								write("<td>" + s + "</td>", 5);
 							}
+							else {
+							write("<td><a href = \"https://www.ncbi.nlm.nih.gov/gene/" + strSplit[9] + "\">" + s
+									+ "</td>", 5);
+							}
 							break;
-						case 18:
+						case 9:
+							if (s.equals("unavailable")){
+								write("<td>" + s + "</td>", 5);
+							}
+							else {
+							write("<td><a href = \"https://www.ncbi.nlm.nih.gov/gene/" + s + "\">" + s + "</td>", 5);
+							}
+							break;
+//						case 13:
+//							if (annot.equals("def")) {
+//								write("<td><a href = \"https://www.ncbi.nlm.nih.gov/gene/" + strSplit[9] + "\"></td>",
+//										5);
+//							} else {
+//								write("<td>" + s + "</td>", 5);
+//							}
+							//break;
+						case 14:
 							// RegulomeDB links displays the rsid in the title if the position is decremented
 							// by 1, else it displays "n/a". Other information in the page are the same if
 							// position is left as it is
 							String c;
 							if (s.equals("not in the base")) {
-								c = "Not in the base, link works though";
+								c = "The variant is not in the database but exists online";
 //								write("<td class = \"" + c + "\"><a href = \"http://www.regulomedb.org/snp/chr"
 //										+ strSplit[0] + "/" + String.valueOf(Integer.parseInt(strSplit[2]) - 1)
 //										+ "\">Not in the base, link works though</td>", 5);
@@ -311,20 +329,97 @@ public class HtmlOutput {
 							+ strSplit[0] + "/" + String.valueOf(Integer.parseInt(strSplit[2]) - 1)
 							+"\">" + c +"</td>", 5);
 							break;
+						case 15:
+							// Regdb prediction skipped
+							break;
+						case 16:
+							if (s.equals(".")){
+								write("<td>" + s + "</td>", 5);
+							}
+							else {
+							if (Float.valueOf(s) < 0.05){
+								write("<td class = \"" + red + "\">" + s + "</td>", 5);
+							}
+							else{
+								write("<td class = \"" + vert + "\">" + s + "</td>", 5);
+							}
+							}
+							
+//							else {
+//								write("<td>" + s + "</td>", 5);
+//							}
+							break;
+						case 17:
+							// SIFT prediction skipped
+							break;
+						case 18:
+							if (s.equals(".")){
+								write("<td>" + s + "</td>", 5);
+							}
+							else{
+							if ( Float.valueOf(s)> 0.453 && Float.valueOf(s)< 0.956){
+								write("<td class = \"" + orange + "\">" + s + "</td>", 5);
+							}
+							else if (Float.valueOf(s)> 0.956){
+								write("<td class = \"" + red + "\">" + s + "</td>", 5);
+							}
+							else {
+								write("<td class = \"vert\">" + s + "</td>", 5);
+							}
+							
+							
+								
+							}
+							break;
 						case 19:
-							// RegulomeDB score explanation is not kept in the html file given that there
-							// are the link and a color system which explains it.
+							// polyphen  prediction skipped
+							break;
+						case 20:
+							if (s.equals(".")){
+								write("<td>" + s + "</td>", 5);
+							}
+							else{
+							if (Float.valueOf(s) < 2.5){
+								write("<td class = \"" + red + "\">" + s + "</td>", 5);
+							}
+							else {
+								write("<td class = \"" + vert + "\">" + s + "</td>", 5);
+							}
+						}
+							
+							break;
+						case 21:
+							// Provean prediction skipped
+							break;
+						case 22:
+							if (s.equals(".")){
+								write("<td>" + s + "</td>", 5);
+								}
+							else{
+							if (Float.valueOf(s) < 15){
+								write("<td class = \"" + vert + "\">" + s + "</td>", 5);
+							}
+							else {
+								write("<td class = \"" + red + "\">" + s + "</td>", 5);
+							}
+							}
+							
 							break;
 						default:
 							// In any other case, no link is added so the information remain as they are
+							
 							write("<td>" + s + "</td>", 5);
+							
 						}
 						i++;
 					}
 					str = frqReader.readLine();
 					write("</tr>", 4);
 				}
-
+				
+				}catch(NumberFormatException ex){ // handle your exception
+					System.out.println("not a number"); 
+					}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

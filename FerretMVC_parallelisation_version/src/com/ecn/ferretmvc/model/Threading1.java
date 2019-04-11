@@ -18,10 +18,12 @@ import javax.swing.*;
 
 import org.broad.tribble.readers.TabixReader;
 
+import com.ecn.ferretmvc.view.GUI;
 import com.sun.jimi.core.*;
 
+import javax.swing.SwingWorker;
 
-public class Threading1 implements Runnable {
+public class Threading1 implements Runnable  {
 	
     int j;
     long startTime;
@@ -34,6 +36,7 @@ public class Threading1 implements Runnable {
     int[] querySize;
     String fileName;
     //int cpt;
+	public static int progress;
     public static volatile Map<Integer, Map> StockLineVcfall;
    
  
@@ -51,41 +54,21 @@ public class Threading1 implements Runnable {
 //		    	Threading1.variantCounter = variantCounter;
 		    this.tempInt = tempInt;
 		    this.querySize = querySize;
-		    this.fileName = fileName;			
+		    this.fileName = fileName;
+		    Threading1.progress = 0;
 			 			}
 		
 		
  
 		@Override
-		public void run() {
+		public void run()  {
 			try{
 				//File vcfFile = new File(fileName + "_genotypes.vcf");
 				
 			webAddress = ftpAddress.replace("$", sortedQueries.get(j).getChr());
-            System.out.println("QUERY NUMBER ---->" + queryNumber + "\tSORTED QUERIES ---->" + sortedQueries.get(j).getChr() + "\tWEBADRESS ---->" + webAddress);
-            //webAddress = "ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/ALL.chr" + sortedQueries.get(j).getChr() + ".phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz";
-            //webAddress = "ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/supporting/GRCh38_positions/ALL.chr" + sortedQueries.get(j).getChr() + ".phase3_shapeit2_mvncall_integrated_v3plus_nounphased.rsID.genotypes.GRCh38_dbSNP_no_SVs.vcf.gz";
             TabixReader tr = new TabixReader(webAddress);
-            System.out.println("tr --->" + tr);
-           // BufferedWriter vcfBuffWrite = new BufferedWriter(new FileWriter(vcfFile));
-            // Get the iterator
-            int diff = (int)((sortedQueries.get(j).getEnd() - sortedQueries.get(j).getStart())/2);
-            System.out.println("diff---->" + diff);
-            int Mid = (sortedQueries.get(j).getStart() + diff);
-            System.out.println("Mid---->" + Mid);
-            System.out.println("index j ---->" + this.j);
-            
-           // new tbx(start, mid);
-            
-           
-            
-            
-            
             startTime = System.nanoTime();
-            TabixReader.Iterator iter = tr.query(sortedQueries.get(j).getChr() + ":" + sortedQueries.get(j).getStart() + "-" + sortedQueries.get(j).getEnd());
-            System.out.println("iter --->" + iter);
-            System.out.println("WHAT'S UP ? --->" + sortedQueries.get(j).getChr() + ":" + sortedQueries.get(j).getStart() + "-" + sortedQueries.get(j).getEnd());
-            
+            TabixReader.Iterator iter = tr.query(sortedQueries.get(j).getChr() + ":" + sortedQueries.get(j).getStart() + "-" + sortedQueries.get(j).getEnd());            
             long endTime = System.nanoTime();
             System.out.println("Tabix iterator timeff: " + (endTime - startTime));
             String s;
@@ -99,9 +82,13 @@ public class Threading1 implements Runnable {
                 if (stringSplit[6].equals("PASS")) {
                     if (FerretData.isInteger(stringSplit[1])) {
                         tempInt = Integer.parseInt(stringSplit[1]) - sortedQueries.get(j).getStart();
-//                        if (tempInt > 0) {
-//                            setProgress((int) ((tempInt + querySize[j]) / (double) querySize[queryNumber] * 99));
-//                        }
+                        if (tempInt > 0) {
+                            //setProgress((int) ((tempInt + querySize[j]) / (double) querySize[queryNumber] * 99));
+                        	Threading1.progress = (int) ((tempInt + querySize[j]) / (double) querySize[queryNumber] * 99);
+                        	//System.out.println("PROGRESSSIONNN"+Threading1.progress);
+                        	GUI.getProgressBar().setValue(Threading1.progress);
+                        	
+                        }
                     }
                     if (stringSplit[2].equals(".")) {
                         stringSplit[2] = "chr" + sortedQueries.get(j).getChr() + "_" + stringSplit[1];
@@ -130,7 +117,7 @@ public class Threading1 implements Runnable {
                     //vcfBuffWrite.newLine();
                 }
                 cpt++;
-                System.out.println("cpt1--->" + cpt);
+             //   System.out.println("cpt1--->" + cpt);
             }
             Threading1.StockLineVcfall.put(this.j, StockLineVcfallLocal);
             long endEndTime = System.nanoTime();
@@ -142,8 +129,7 @@ public class Threading1 implements Runnable {
 			}
          	
 	            }
-			
-            
+
             }
 
 

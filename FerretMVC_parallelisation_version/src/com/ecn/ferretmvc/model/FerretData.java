@@ -57,21 +57,7 @@ import java.util.concurrent.*;
 
 
 public class FerretData extends SwingWorker<Integer, String> {
-	private static final int MYTHREADS = 30;
-	//private static BufferedReader br;
-	//private static BufferedReader brvep;
-	//public static String Varid = null;
-	//BufferedWriter mapWrite, infoWrite, pedWrite, frqWrite;
-    //boolean fileEmpty, frqFileEmpty;
-    //int index;
-    //int espErrorCount;
-   // String s;
-    //String[][] genotypes;
-    //LinkedList<EspInfoObj> espData;
-    //public static String[] text;
-    //private String [] StockLineFreq;
-	//boolean allSNPsFound;
-	//BufferedReader br;
+
     private Map<Integer, String> StockLineFreq;
 
 
@@ -79,10 +65,7 @@ public class FerretData extends SwingWorker<Integer, String> {
 
         ThreadPoolExecutor  executor= new ThreadPoolExecutor(300,300,500, TimeUnit.MILLISECONDS,
    		 new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.CallerRunsPolicy());
-        
-    //ExecutorService executor = Executors.newFixedThreadPool(MYTHREADS);
-    //private GUI gui = new GUI();
-    //private DownloadTheDataModel model = new DownloadTheDataModel();
+
 
     InputRegion[] queries;
     ArrayList<CharSequence> populations;
@@ -95,8 +78,9 @@ public class FerretData extends SwingWorker<Integer, String> {
     String outputFiles;
     String annotFiles;
     double espMAF;
-    private boolean usehaplo;
+    //private boolean usehaplo;
     boolean htmlOutputFile;
+    boolean downloadHaplo;
 
     String queryType = null; // for both gene and SNP queries
     Boolean defaultHG = null; // for both gene and SNP queries
@@ -108,7 +92,7 @@ public class FerretData extends SwingWorker<Integer, String> {
 
     // constructor for the locus research
     public FerretData(InputRegion[] queries, ArrayList<CharSequence> populations, String fileName,
-            boolean retrieveESP, JLabel status, String ftpAddress, double MAF, double MAFMax, Boolean ESPMAF, String outputFiles , String annotFiles,boolean htmlOutputFile) {
+            boolean retrieveESP, JLabel status, String ftpAddress, double MAF, double MAFMax, Boolean ESPMAF, String outputFiles , String annotFiles,boolean htmlOutputFile,boolean downloadHaplo ) {
         this.queries = queries;
         this.populations = populations;
         this.fileName = fileName;
@@ -125,13 +109,14 @@ public class FerretData extends SwingWorker<Integer, String> {
         this.outputFiles = outputFiles;
         this.annotFiles = annotFiles;
         this.htmlOutputFile = htmlOutputFile;
-        this.usehaplo = false;
+        this.downloadHaplo = downloadHaplo;
+       // this.usehaplo = false;
     }
 
     //Constructor for the SNP (variants) research
     public FerretData(String queryType, ArrayList<String> snpQueries, ArrayList<CharSequence> populations, String fileName,
             boolean retrieveESP, JLabel status, String ftpAddress, double MAF, double MAFMax, Boolean ESPMAF, String outputFiles, boolean defaultHG,
-            boolean snpWindowSelected, Integer windowSize, String annotFiles,boolean htmlOutputFile) {
+            boolean snpWindowSelected, Integer windowSize, String annotFiles,boolean htmlOutputFile, boolean downloadHaplo) {
         // this constructor is exclusively for SNP queries
         this.queries = null;
         this.populations = populations;
@@ -154,12 +139,13 @@ public class FerretData extends SwingWorker<Integer, String> {
         this.defaultHG = defaultHG;
         this.snpWindowSelected = snpWindowSelected;
         this.windowSize = windowSize;
-        this.usehaplo = false;
+        //this.usehaplo = false;
+        this.downloadHaplo = downloadHaplo;
     }
 
     //Constructor for the gene research
     public FerretData(String queryType, String[] geneQueries, ArrayList<CharSequence> populations, String fileName,
-            boolean retrieveESP, JLabel status, String ftpAddress, double MAF, double MAFMax, Boolean ESPMAF, String outputFiles, boolean defaultHG, boolean geneWindowSelected, Integer windowSize, int o, String annotFiles,boolean htmlOutputFile) {
+            boolean retrieveESP, JLabel status, String ftpAddress, double MAF, double MAFMax, Boolean ESPMAF, String outputFiles, boolean defaultHG, boolean geneWindowSelected, Integer windowSize, int o, String annotFiles,boolean htmlOutputFile, boolean downloadHaplo) {
         // this constructor is exclusively for gene queries
         this.queries = null;
         this.populations = populations;
@@ -182,15 +168,16 @@ public class FerretData extends SwingWorker<Integer, String> {
         this.defaultHG = defaultHG;
         this.geneWindowSelected = geneWindowSelected;
         this.windowSize = windowSize;
-        this.usehaplo = false;
+        //this.usehaplo = false;
+        this.downloadHaplo =  downloadHaplo;
     }
 
 
 
 	//setter that put the boolean usehaplo as true, use in doInBackGround to open or not Haploview at the end
-    public void setHaplo(boolean b) {
-        this.usehaplo = b;
-    }
+//    public void setHaplo(boolean b) {
+//        this.usehaplo = b;
+//    }
 
     @Override
     public Integer doInBackground() throws Exception {
@@ -224,7 +211,7 @@ public class FerretData extends SwingWorker<Integer, String> {
               	while (!executor.isTerminated()) {
 
               	}
-              	executor = new ThreadPoolExecutor(300,300,500, TimeUnit.MILLISECONDS,
+              	executor = new ThreadPoolExecutor(100,100,500, TimeUnit.MILLISECONDS,
               	   		 new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.CallerRunsPolicy());
 
             
@@ -513,6 +500,9 @@ public class FerretData extends SwingWorker<Integer, String> {
                     for (int j = 0; j < queryNumber; j++) {
                     	Runnable worker2 = new Threading1(j,startTime,sortedQueries,webAddress,ftpAddress,queryNumber,variantCounter,tempInt,querySize,fileName);
                     executor.execute(worker2);
+//                  if (tempInt > 0) {
+//                  setProgress((int) ((tempInt + querySize[j]) / (double) querySize[queryNumber] * 99));
+//              }
                     compt++;
                     System.out.println("variantCounterfor--->" + variantCounter);
                     }
@@ -529,12 +519,12 @@ public class FerretData extends SwingWorker<Integer, String> {
                   	File vcfFile = new File(fileName + "_genotypes.vcf");
                   	vcfFile.createNewFile();
                   	vcfBuffWrite = new BufferedWriter(new FileWriter(vcfFile));
-                  	System.out.println("buffWrite" + vcfBuffWrite);
+                  	//System.out.println("buffWrite" + vcfBuffWrite);
                   	//HERE
                   	
                   	for (int i = 0; i < compt; i++) {
                    	 if(Threading1.StockLineVcfall.get(i) == null){
-                   		 System.out.println("StockLineVcfall: idx ("+ i +") does not exist");
+                   		 //System.out.println("StockLineVcfall: idx ("+ i +") does not exist");
                    	 }
                    	else{
                    		int localSize = Threading1.StockLineVcfall.get(i).size();
@@ -565,7 +555,7 @@ public class FerretData extends SwingWorker<Integer, String> {
                 return -1;
             }
             variantCounter = Threading1.variantCounter;
-            System.out.println("variantCounterouttry--->" + variantCounter);
+            //System.out.println("variantCounterouttry--->" + variantCounter);
             
             // end VCF writing
 
@@ -661,23 +651,32 @@ public class FerretData extends SwingWorker<Integer, String> {
 				}
                 String Varid = null;
               int count = 0;
+              int countfake = 0;
               StockLineFreq = new HashMap<>();
-
+              
+				//String [] test = {"rs201864858", "rs201864858", "rs372723457", "rs372723457", "rs11553019", "rs11553019", "rs139017158", "rs139017158", "rs149964072", "rs149964072", "rs11553018", "rs11553018", "rs141052988", "rs141052988", "rs145664491", "rs145664491", "rs148306581", "rs148306581", "rs74558623", "rs74558623", "rs79377094", "rs79377094", "rs201610844", "rs201610844", "rs375850117", "rs375850117", "rs201342263", "rs201342263", "rs201892015", "rs201892015", "rs115595484", "rs115595484", "rs367663038", "rs367663038", "rs199853927", "rs199853927", "rs200757617", "rs200757617", "rs138567361", "rs138567361", "rs369805092", "rs369805092", "rs200178716", "rs200178716", "rs150755193", "rs150755193", "rs111662059", "rs111662059", "rs376725006", "rs376725006", "rs375747724", "rs375747724", "rs200476766", "rs200476766", "rs375678465", "rs375678465", "rs370150531", "rs370150531", "rs75915990", "rs75915990", "rs141372323", "rs141372323", "rs121909386", "rs121909386", "rs371779195", "rs371779195", "rs190323395", "rs190323395", "rs375833021", "rs375833021", "rs149516753", "rs149516753", "rs140753322", "rs140753322", "rs183437359", "rs183437359", "rs367727112", "rs367727112", "rs370770872", "rs370770872", "rs200241388", "rs200241388", "rs143432523", "rs143432523", "rs370731821", "rs370731821", "rs201280490", "rs201280490", "rs372770283", "rs372770283", "rs199753491", "rs199753491", "rs182944047", "rs182944047", "rs200892725", "rs200892725", "rs372546647", "rs372546647", "rs112200975", "rs112200975", "rs367763475", "rs367763475", "rs150890799", "rs150890799", "rs140162687", "rs140162687", "rs374218650", "rs374218650", "rs149456198", "rs149456198", "rs141485845", "rs141485845", "rs371085455", "rs371085455", "rs368955427", "rs368955427", "rs376644821", "rs376644821", "rs368720992", "rs368720992", "rs191962962"};
+//String [] test = {"rs201864858", "rs201864858", "rs372723457", "rs372723457", "rs11553019", "rs11553019", "rs139017158", "rs139017158", "rs149964072", "rs149964072", "rs11553018", "rs11553018", "rs141052988", "rs141052988", "rs145664491", "rs145664491", "rs148306581", "rs148306581", "rs74558623", "rs74558623", "rs79377094", "rs79377094", "rs201610844", "rs201610844", "rs375850117", "rs375850117", "rs201342263", "rs201342263", "rs201892015", "rs201892015", "rs115595484", "rs115595484", "rs367663038", "rs367663038", "rs199853927", "rs199853927", "rs200757617", "rs200757617", "rs138567361", "rs138567361", "rs369805092", "rs369805092", "rs200178716", "rs200178716", "rs150755193", "rs150755193", "rs111662059", "rs111662059", "rs376725006", "rs376725006", "rs375747724", "rs375747724", "rs200476766", "rs200476766", "rs375678465", "rs375678465", "rs370150531", "rs370150531", "rs75915990", "rs75915990", "rs141372323", "rs141372323", "rs121909386", "rs121909386", "rs371779195", "rs371779195", "rs190323395", "rs190323395", "rs375833021", "rs375833021", "rs149516753", "rs149516753", "rs140753322", "rs140753322", "rs183437359", "rs183437359", "rs367727112", "rs367727112", "rs370770872", "rs370770872", "rs200241388", "rs200241388", "rs143432523", "rs143432523", "rs370731821", "rs370731821", "rs201280490", "rs201280490", "rs372770283", "rs372770283", "rs199753491", "rs199753491", "rs182944047", "rs182944047", "rs200892725", "rs200892725", "rs372546647", "rs372546647", "rs112200975", "rs112200975", "rs367763475", "rs367763475", "rs150890799", "rs150890799", "rs140162687", "rs140162687", "rs374218650", "rs374218650", "rs149456198", "rs149456198", "rs141485845", "rs141485845", "rs371085455", "rs371085455", "rs368955427", "rs368955427", "rs376644821", "rs376644821", "rs368720992", "rs368720992", "rs191962962", "rs200130252", "rs371464691", "rs371464691", "rs149860299", "rs149860299", "rs17853311", "rs17853311", "rs141799648", "rs141799648", "rs200991345", "rs200991345", "rs373556968", "rs373556968", "rs370490541", "rs370490541", "rs192433801", "rs192433801", "rs193921120", "rs193921120", "rs114832056", "rs114832056", "rs141148427", "rs141148427", "rs139868171", "rs139868171", "rs55645588", "rs55645588", "rs148930332", "rs148930332", "rs142380036", "rs142380036", "rs143114089", "rs143114089", "rs371795113", "rs371795113", "rs140868942", "rs140868942", "rs77612325", "rs77612325", "rs201930721", "rs201930721", "rs369386837", "rs369386837", "rs200063787", "rs200063787", "rs144694271", "rs144694271", "rs61754144", "rs61754144", "rs371058203", "rs371058203", "rs374299422", "rs374299422", "rs202183416", "rs202183416", "rs376237191", "rs376237191", "rs142931576", "rs142931576", "rs138453809", "rs138453809", "rs372669126", "rs372669126", "rs200741488", "rs200741488", "rs145258022", "rs145258022", "rs142133680", "rs142133680", "rs111936698", "rs111936698", "rs200087965", "rs200087965", "rs199969149", "rs199969149", "rs141849409", "rs141849409", "rs201695911", "rs201695911", "rs139592813", "rs139592813", "rs147924412", "rs147924412", "rs140792332", "rs140792332", "rs377181231", "rs377181231", "rs150189833", "rs150189833", "rs375141804", "rs375141804", "rs116116323", "rs116116323", "rs376471217", "rs376471217", "rs372047402", "rs372047402", "rs146864292", "rs146864292", "rs150447575", "rs150447575", "rs201238689", "rs201238689", "rs56060938", "rs56060938", "rs145969024", "rs145969024", "rs150396730", "rs150396730", "rs375719718", "rs375719718", "rs368122000", "rs368122000", "rs202219610", "rs202219610", "rs141553742", "rs141553742", "rs143598492", "rs143598492", "rs139848963", "rs139848963", "rs150726674", "rs150726674", "rs150071690", "rs150071690", "rs369614398", "rs369614398", "rs199508384", "rs199508384", "rs142579927", "rs142579927", "rs370707974", "rs370707974", "rs199541629", "rs199541629", "rs144489576", "rs144489576", "rs141603160", "rs141603160", "rs200376025", "rs200376025", "rs377247971", "rs377247971", "rs368507889", "rs368507889", "rs200504997", "rs200504997", "rs372554319", "rs372554319", "rs200846585", "rs200846585", "rs374693835", "rs374693835", "rs199677710", "rs199677710", "rs149375068", "rs149375068", "rs35715176", "rs35715176", "rs370312220", "rs370312220", "rs187291416", "rs187291416", "rs377047066", "rs377047066", "rs369470185", "rs369470185", "rs201203932", "rs201203932", "rs370657286", "rs370657286", "rs377175915", "rs377175915", "rs376584070", "rs376584070", "rs370690563", "rs370690563", "rs367765965", "rs367765965", "rs372071733", "rs372071733", "rs150523147", "rs150523147", "rs371354151", "rs371354151", "rs372163152", "rs372163152", "rs201841925", "rs201841925", "rs71427088", "rs71427088", "rs374710689", "rs374710689", "rs368841036", "rs368841036", "rs200413243", "rs200413243", "rs370205425", "rs370205425", "rs191606676", "rs191606676", "rs367710609", "rs367710609", "rs142154282", "rs142154282", "rs181473681", "rs181473681", "rs187155661", "rs187155661", "rs199818112", "rs199818112", "rs371033068", "rs371033068", "rs373626756", "rs373626756", "rs368217243", "rs368217243", "rs369596744", "rs369596744", "rs202089899", "rs202089899", "rs200820148", "rs200820148", "rs71427089", "rs71427089", "rs371667746", "rs371667746", "rs71427090", "rs71427090", "rs182279361", "rs182279361", "rs373744329", "rs373744329", "rs151143572", "rs151143572", "rs139005498", "rs139005498", "rs375375643", "rs375375643", "rs375994530", "rs375994530", "rs374460728", "rs374460728", "rs184478113", "rs184478113", "rs374283621", "rs374283621", "rs376710920", "rs376710920", "rs368058960", "rs368058960", "rs369812628", "rs369812628", "rs377218922", "rs377218922", "rs373937760", "rs373937760", "rs367716506", "rs367716506", "rs187784560", "rs187784560", "rs371057125", "rs371057125", "rs375430386", "rs375430386", "rs200360125", "rs200360125", "rs376612569", "rs376612569", "rs201025190", "rs201025190", "rs368242766", "rs368242766", "rs371796431", "rs371796431", "rs375965191", "rs375965191", "rs201857731", "rs201857731", "rs149461143", "rs149461143", "rs201676969", "rs201676969", "rs182265220", "rs182265220", "rs376575004", "rs376575004", "rs368659402", "rs368659402", "rs138453809", "rs372669126", "rs372669126", "rs200741488", "rs200741488", "rs145258022", "rs145258022", "rs142133680", "rs142133680", "rs111936698", "rs111936698", "rs200087965", "rs200087965", "rs199969149", "rs199969149", "rs141849409", "rs141849409", "rs201695911", "rs201695911", "rs139592813", "rs139592813", "rs147924412", "rs147924412", "rs140792332", "rs140792332", "rs377181231", "rs377181231", "rs150189833", "rs150189833", "rs375141804", "rs375141804", "rs116116323", "rs116116323", "rs376471217", "rs376471217", "rs372047402", "rs372047402", "rs146864292", "rs146864292", "rs150447575", "rs150447575", "rs201238689", "rs201238689", "rs56060938", "rs56060938", "rs145969024", "rs145969024", "rs150396730", "rs150396730", "rs375719718", "rs375719718", "rs368122000", "rs368122000", "rs202219610", "rs202219610", "rs141553742", "rs141553742", "rs143598492", "rs143598492", "rs139848963", "rs139848963", "rs150726674", "rs150726674", "rs150071690", "rs150071690", "rs369614398", "rs369614398", "rs199508384", "rs199508384", "rs142579927", "rs142579927", "rs370707974", "rs370707974", "rs199541629", "rs199541629", "rs144489576", "rs144489576", "rs141603160", "rs141603160", "rs200376025", "rs200376025", "rs377247971", "rs377247971", "rs368507889", "rs368507889", "rs200504997", "rs200504997", "rs372554319", "rs372554319", "rs200846585", "rs200846585", "rs374693835", "rs374693835", "rs199677710", "rs199677710", "rs149375068", "rs149375068", "rs35715176", "rs35715176", "rs370312220", "rs370312220", "rs187291416", "rs187291416", "rs377047066", "rs377047066", "rs369470185", "rs369470185", "rs201203932", "rs201203932", "rs370657286", "rs370657286", "rs377175915", "rs377175915", "rs376584070", "rs376584070", "rs370690563", "rs370690563", "rs62269205", "rs190964735", "rs190964735", "rs370057056", "rs370057056", "rs201919360", "rs201919360", "rs139164443", "rs139164443", "rs201539423", "rs201539423", "rs139137023", "rs139137023", "rs146027039", "rs146027039", "rs142746163", "rs142746163", "rs144519399", "rs144519399", "rs201585253", "rs201585253", "rs182963279", "rs182963279", "rs148433157", "rs148433157", "rs115649165", "rs115649165", "rs145512022", "rs145512022", "rs200029008", "rs200029008", "rs149648608", "rs149648608", "rs112272566", "rs112272566", "rs143072070", "rs143072070", "rs148962924", "rs148962924", "rs143709160", "rs143709160", "rs148044268", "rs148044268", "rs200848106", "rs200848106", "rs145984650", "rs145984650", "rs200363593", "rs200363593", "rs141814734", "rs141814734", "rs9282642", "rs9282642", "rs2681417", "rs2681417", "rs151260884", "rs151260884", "rs371529328", "rs371529328", "rs144220043", "rs144220043", "rs373228315", "rs373228315", "rs1129055", "rs1129055", "rs370380261", "rs370380261", "rs9282648", "rs9282648", "rs368315978", "rs368315978", "rs371670872", "rs371670872", "rs144326666", "rs144326666", "rs139407450", "rs139407450", "rs370220584", "rs370220584", "rs193922420", "rs193922420", "rs193922432", "rs193922432", "rs104893691", "rs104893691", "rs104893695", "rs104893695", "rs201923228", "rs201923228", "rs121909264", "rs121909264", "rs104893689", "rs104893689", "rs104893697", "rs104893697", "rs200004528", "rs200004528", "rs201091657", "rs201091657", "rs373376842", "rs373376842", "rs62269092", "rs62269092", "rs202179597", "rs202179597", "rs200554202", "rs200554202", "rs200039241", "rs200039241", "rs121909259", "rs121909259", "rs200838528", "rs200838528", "rs193922444", "rs193922444", "rs200771541", "rs200771541", "rs201338034", "rs201338034", "rs145869851", "rs145869851", "rs199980578", "rs199980578", "rs202228006", "rs202228006", "rs201177696", "rs201177696", "rs193922421", "rs193922421", "rs141315218", "rs141315218", "rs192507347", "rs192507347", "rs201423861", "rs201423861", "rs199719951", "rs199719951", "rs140467141", "rs140467141", "rs148174536", "rs148174536", "rs77838721", "rs77838721", "rs377268683", "rs377268683", "rs201572629", "rs201572629", "rs104893716", "rs104893716", "rs200240922", "rs200240922", "rs201536450", "rs201536450", "rs193922423", "rs193922423", "rs377233360", "rs377233360", "rs199688157", "rs199688157", "rs201568219", "rs201568219", "rs115230894", "rs115230894", "rs104893719", "rs104893719", "rs193922425", "rs193922425", "rs201048395", "rs201048395", "rs104893712", "rs104893712", "rs143470909", "rs143470909", "rs201852643", "rs201852643", "rs193922430", "rs193922430", "rs201609857", "rs201609857", "rs104893700", "rs104893700", "rs193922431", "rs193922431", "rs200818687", "rs200818687", "rs201828974", "rs201828974", "rs201670662", "rs201670662", "rs104893718", "rs104893718", "rs200318708", "rs200318708", "rs375468610", "rs375468610", "rs193922433", "rs193922433", "rs199508583", "rs199508583", "rs193922436", "rs193922436", "rs104893706", "rs104893706", "rs373819680", "rs373819680", "rs200777304", "rs200777304", "rs121909269", "rs121909269", "rs201449422", "rs201449422", "rs76327999", "rs76327999", "rs4987051", "rs4987051", "rs200238591", "rs200238591", "rs142704083", "rs142704083", "rs201739901", "rs201739901", "rs144802947", "rs144802947", "rs201579531", "rs201579531", "rs370210949", "rs370210949", "rs142032585", "rs142032585", "rs200394711", "rs200394711", "rs368381766", "rs201864858", "rs372723457", "rs372723457", "rs11553019", "rs11553019", "rs139017158", "rs139017158", "rs149964072", "rs149964072", "rs11553018", "rs11553018", "rs141052988", "rs141052988", "rs145664491", "rs145664491", "rs148306581", "rs148306581", "rs74558623", "rs74558623", "rs79377094", "rs79377094", "rs201610844", "rs201610844", "rs375850117", "rs375850117", "rs201342263", "rs201342263", "rs201892015", "rs201892015", "rs115595484", "rs115595484", "rs367663038", "rs367663038", "rs199853927", "rs199853927", "rs200757617", "rs200757617", "rs138567361", "rs138567361", "rs369805092", "rs369805092", "rs200178716", "rs200178716", "rs150755193", "rs150755193", "rs111662059", "rs111662059", "rs376725006", "rs376725006", "rs375747724", "rs375747724", "rs200476766", "rs200476766", "rs375678465", "rs375678465", "rs370150531", "rs370150531", "rs75915990", "rs75915990", "rs141372323", "rs141372323", "rs121909386", "rs121909386", "rs371779195", "rs371779195", "rs190323395", "rs190323395", "rs375833021", "rs375833021", "rs149516753", "rs149516753", "rs140753322", "rs140753322", "rs183437359", "rs183437359", "rs367727112", "rs367727112", "rs370770872", "rs370770872", "rs200241388", "rs200241388", "rs143432523", "rs143432523", "rs370731821", "rs370731821", "rs201280490", "rs201280490", "rs372770283", "rs372770283", "rs199753491", "rs199753491", "rs182944047", "rs182944047", "rs200892725", "rs200892725", "rs372546647", "rs372546647", "rs112200975", "rs112200975", "rs367763475", "rs367763475", "rs150890799", "rs150890799", "rs140162687", "rs140162687", "rs374218650", "rs374218650", "rs149456198", "rs149456198", "rs141485845", "rs141485845", "rs371085455", "rs371085455", "rs368955427", "rs368955427", "rs376644821", "rs376644821", "rs368720992", "rs368720992", "rs191962962", "rs200130252", "rs371464691", "rs375430386", "rs375430386", "rs200360125", "rs200360125", "rs376612569", "rs376612569", "rs201025190", "rs201025190", "rs368242766", "rs368242766", "rs371796431", "rs371796431", "rs375965191", "rs375965191", "rs201857731", "rs201857731", "rs149461143", "rs149461143", "rs201676969", "rs201676969", "rs182265220", "rs182265220", "rs376575004", "rs376575004", "rs368659402", "rs368659402", "rs138453809", "rs372669126", "rs372669126", "rs200741488", "rs200741488", "rs145258022", "rs145258022", "rs142133680", "rs142133680", "rs111936698", "rs111936698", "rs200087965", "rs200087965", "rs199969149", "rs199969149", "rs141849409", "rs141849409", "rs201695911", "rs201695911", "rs139592813", "rs139592813", "rs147924412", "rs147924412", "rs140792332", "rs140792332", "rs377181231", "rs377181231", "rs150189833", "rs150189833", "rs375141804", "rs375141804", "rs116116323", "rs116116323", "rs376471217", "rs376471217", "rs372047402", "rs372047402", "rs146864292", "rs146864292", "rs150447575", "rs150447575", "rs201238689", "rs201238689", "rs56060938", "rs56060938", "rs145969024", "rs145969024", "rs150396730", "rs150396730", "rs375719718", "rs375719718", "rs368122000", "rs368122000", "rs202219610", "rs202219610", "rs141553742", "rs141553742", "rs143598492", "rs143598492", "rs139848963", "rs139848963", "rs150726674", "rs150726674", "rs150071690", "rs150071690", "rs369614398", "rs369614398", "rs199508384", "rs199508384", "rs142579927", "rs142579927", "rs370707974", "rs370707974", "rs199541629", "rs199541629", "rs144489576", "rs144489576", "rs141603160", "rs141603160", "rs200376025", "rs200376025", "rs377247971", "rs377247971", "rs368507889", "rs368507889", "rs200504997", "rs200504997", "rs372554319", "rs372554319", "rs200846585", "rs200846585", "rs374693835", "rs374693835", "rs199677710", "rs199677710", "rs149375068", "rs149375068", "rs35715176", "rs35715176", "rs370312220", "rs370312220", "rs187291416", "rs187291416", "rs377047066", "rs377047066", "rs369470185", "rs369470185", "rs201203932", "rs201203932", "rs370657286", "rs370657286", "rs377175915", "rs377175915", "rs376584070", "rs376584070", "rs370690563", "rs370690563", "rs62269205", "rs190964735", "rs190964735", "rs370057056", "rs370057056", "rs201919360", "rs201919360", "rs139164443", "rs139164443", "rs201539423", "rs201539423", "rs139137023", "rs139137023", "rs146027039", "rs146027039", "rs142746163", "rs142746163", "rs144519399", "rs144519399", "rs201585253", "rs201585253", "rs182963279", "rs182963279", "rs148433157", "rs148433157", "rs115649165", "rs115649165", "rs145512022", "rs145512022", "rs200029008", "rs200029008", "rs149648608", "rs149648608", "rs112272566", "rs112272566", "rs143072070", "rs143072070", "rs148962924", "rs148962924", "rs143709160", "rs143709160", "rs148044268", "rs148044268", "rs200848106", "rs200848106", "rs145984650", "rs145984650", "rs200363593", "rs200363593", "rs141814734", "rs141814734", "rs9282642", "rs9282642", "rs2681417"};
+        
                 while ((s = vcfRead.readLine()) != null) {
                 	
                    String [] text = s.split("\t");
-                    System.out.print("\t text" + text[2]);
+                    //System.out.print("\t text" + text[2]);
                     Varid = text[2].substring(2);
-                	System.out.println("Varid : " + Varid);
+                    //System.out.print("test" + test[count]);
+                	//System.out.println("Varid : " + Varid);
                    
 /* text[2] contains all the rsid for a gene, a locus or variants inputted by the user*/
 
-                   
+                    
+                    
                    
                  worker = new AnnotThreading(count,Varid,conn);
+                    //worker = new AnnotThreading(count,Varid,conn);
                  executor.execute(worker);
+                 setProgress(Threading1.progress);
+                 
 
-
+                    
 
 
                     String[] variantPossibilities;
@@ -742,7 +741,7 @@ public class FerretData extends SwingWorker<Integer, String> {
                                 index++;
                             }
                             //if (!text[4].contains("CN") && (freqZero >= MAF && freqOne >= MAF && freqOne <= MAFMax)) {
-                            if (!text[4].contains("CN") && (freqZero >= MAF && freqOne >= MAF)) {
+                            if (!text[4].contains("CN") && (freqZero >= MAF && freqOne >= MAF && ((freqOne <= MAFMax) || (freqZero <= MAFMax)))) {
                                 fileEmpty = false;
                                 mapWrite.write(text[0] + "\t" + text[2] + "\t0\t" + text[1]);
                                 mapWrite.newLine();
@@ -780,24 +779,24 @@ public class FerretData extends SwingWorker<Integer, String> {
                             EspInfoObj temp = espData.remove();///
                             // 1KG and ESP Ref alleles and Alt alleles match
                             if (variantPossibilities[0].equals(temp.getRefAllele()) && variantPossibilities[1].equals(temp.getAltAllele())) {
-                                if ((freqZero >= MAF && freqOne >= MAF && freqOne <= MAFMax) || (temp.getEAFreq() >= espMAF && temp.getEAFreq() <= (1 - espMAF)) || (temp.getAAFreq() >= espMAF && temp.getAAFreq() <= (1 - espMAF))) {
-                                    frqFileEmpty = false;
+                                if ((freqZero >= MAF && freqOne >= MAF && ((freqOne <= MAFMax) || (freqZero <= MAFMax))) || (temp.getEAFreq() >= espMAF && temp.getEAFreq() <= (1 - espMAF)) || (temp.getAAFreq() >= espMAF && temp.getAAFreq() <= (1 - espMAF))) {
+                                	frqFileEmpty = false;
                                     StockLineFreq.put(count,(text[0] + "\t" + text[2] + "\t" + text[1] + "\t"
                                             + variantPossibilities[0] + "\t" + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t"
                                             + df.format(temp.getEAFreq()) + "\t" + df.format(temp.getAAFreq() +"t")));
                                 }
                                 // 1KG and ESP ref/alt alleles are switched
                             } else if (variantPossibilities[0].equals(temp.getAltAllele()) && variantPossibilities[1].equals(temp.getRefAllele())) {
-                                if ((freqOne >= MAF && freqZero >= MAF && freqOne <= MAFMax) || (temp.getEAFreq() >= espMAF && temp.getEAFreq() <= (1 - espMAF)) || (temp.getAAFreq() >= espMAF && temp.getAAFreq() <= (1 - espMAF))) {
-                                    frqFileEmpty = false;
+                                if ((freqOne >= MAF && freqZero >= MAF && ((freqOne <= MAFMax) || (freqZero <= MAFMax))) || (temp.getEAFreq() >= espMAF && temp.getEAFreq() <= (1 - espMAF)) || (temp.getAAFreq() >= espMAF && temp.getAAFreq() <= (1 - espMAF))) {
+                                	frqFileEmpty = false;
                                     StockLineFreq.put(count,(text[0] + "\t" + text[2] + "\t" + text[1] + "\t"
                                             + variantPossibilities[0] + "\t" + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t"
                                             + df.format(temp.getEAFreqAlt()) + "\t" + df.format(temp.getAAFreqAlt()+"t")));
                                 }
                                 // ESP does not match with 1KG so ESP omitted
                             } else {
-                                if (freqOne >= MAF && freqZero >= MAF && freqOne <= MAFMax) {
-                                    frqFileEmpty = false;
+                                if (freqOne >= MAF && freqZero >= MAF && ((freqOne <= MAFMax) || (freqZero <= MAFMax))) {
+                                	frqFileEmpty = false;
                                     StockLineFreq.put(count,(text[0] + "\t" + text[2] + "\t" + text[1] + "\t"
                                             + variantPossibilities[0] + "\t" + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t"
                                             + "." + "\t" + "."+"t"));
@@ -805,16 +804,16 @@ public class FerretData extends SwingWorker<Integer, String> {
                                 espErrorCount++;
                             }
                         } else if (variantPossibilities.length == 2) {
-                            if (freqOne >= MAF && freqZero >= MAF && freqOne <= MAFMax) {
-                                frqFileEmpty = false;
+                            if (freqOne >= MAF && freqZero >= MAF && ((freqOne <= MAFMax) || (freqZero <= MAFMax))) {
+                            	frqFileEmpty = false;
                                 StockLineFreq.put(count,(text[0] + "\t" + text[2] + "\t" + text[1] + "\t"
                                         + variantPossibilities[0] + "\t" + variantPossibilities[1] + "\t" + numChr + "\t" + df.format(freqZero) + "\t"
                                         + "." + "\t" + "."+"t"));
                             }
                         }
                     } else {
-                        if (variantPossibilities.length == 2 && freqOne >= MAF && freqZero >= MAF && freqOne <= MAFMax) {
-                            frqFileEmpty = false;
+                        if (variantPossibilities.length == 2 && freqOne >= MAF && freqZero >= MAF && ((freqOne <= MAFMax) || (freqZero <= MAFMax))) {
+                        	frqFileEmpty = false;
                             //System.out.print("BECAUSE1 : " + count + "\t" +Varid);
                             if(annotFiles.equals("no"))
                             {
@@ -840,8 +839,11 @@ public class FerretData extends SwingWorker<Integer, String> {
                     //System.out.println("StockLineFreq[count] : " + StockLineFreq[count]);
 
                     count++;
+                   
                 }
+            
                 System.out.println("count = " + count);
+               
 
 
                 executor.shutdown();
@@ -852,28 +854,28 @@ public class FerretData extends SwingWorker<Integer, String> {
             
               	
               	System.out.println("\nFinished all threads");
-              	 File freqFile = new File(fileName + "AlleleFreq.frq");
+              	 File freqFile = new File(fileName + "_Summary.txt");
                  freqFile.createNewFile();
                  frqWrite = new BufferedWriter(new FileWriter(freqFile));
                  if (retrieveESP) {
-                	 System.out.print("BECAUSE5 : " + count + "\t" +Varid);
+                	// System.out.print("BECAUSE5 : " + count + "\t" +Varid);
                      frqWrite.write("CHROM\tVARIANT\tPOS\tALLELE1\tALLELE2\tNB_1KG_CHR\t1KG_A1_FREQ\tESP6500_EA_A1_FREQ\tESP6500_AA_A1_FREQ\tGENENAME\tGENEID\tFUNCTION\tPROTEINPOS\tAACHANGE\tPROTEINACC");
                   
                      frqWrite.newLine();
                  } else {
                  	if(annotFiles.equals("no")){
-                 		System.out.print("BECAUSE6 : " + count + "\t" +Varid);
+                 		//System.out.print("BECAUSE6 : " + count + "\t" +Varid);
                      frqWrite.write("CHROM\tVARIANT\tPOS\tALLELE1\tALLELE2\tNB_CHR\t1KG_A1_FREQ\t1KG_A2_FREQ");
                      frqWrite.newLine();
                  	}
                  	if(annotFiles.equals("def")){
-                 		System.out.print("BECAUSE7 : " + count + "\t" +Varid);
+                 		//System.out.print("BECAUSE7 : " + count + "\t" +Varid);
                          frqWrite.write("CHROM\tVARIANT\tPOS\tALLELE1\tALLELE2\tNB_CHR\t1KG_A1_FREQ\t1KG_A2_FREQ\tGENENAME\tGENEID\tFUNCTION\tPROTEINPOS\tAACHANGE\tPROTEINACC");
                          frqWrite.newLine();
                      	}
                  	if(annotFiles.equals("adv")){
-                 		System.out.print("BECAUSE8 : " + count + "\t" +Varid);
-                 		frqWrite.write("CHROM\tVARIANT\tPOS\tALLELE1\tALLELE2\tNB_CHR\t1KG_A1_FREQ\t1KG_A2_FREQ\tGENENAME\tGENEID\tFUNCTION\tPROTEINPOS\tAACHANGE\tPROTEINACC\tSIFT_SCORE\tSIFT_PREDICTION\tPOLYPHEN_SCORE\tPOLYPHEN_PREDICTION");
+                 		//System.out.print("BECAUSE8 : " + count + "\t" +Varid);
+                 		frqWrite.write("CHROM\tVARIANT\tPOS\tALLELE1\tALLELE2\tNB_CHR\t1KG_A1_FREQ\t1KG_A2_FREQ\tGENENAME\tGENEID\tFUNCTION\tPROTEINPOS\tAACHANGE\tPROTEINACC\tRBDB_SCORE\tRBDB_PREDICTION\tSIFT_SCORE\tSIFT_PREDICTION\tPOLYPHEN_SCORE\tPOLYPHEN_PREDICTION\tPROVEAN_SCORE\tPROVEAN_PREDICTION\tCADD_SCORE");
                  		frqWrite.newLine();
                      	}
                  }
@@ -882,15 +884,25 @@ public class FerretData extends SwingWorker<Integer, String> {
 
                 for (int i = 0; i < count; i++) {
                 	 if(StockLineFreq.get(i) == null){
-                		 System.out.println("StockLineFreq: idx ("+ i +") not exist");
+                		 //System.out.println("StockLineFreq: idx ("+ i +") not exist");
                 	 }
-                	 else if(AnnotThreading.StockLineAnnot.get(i) == null){
-                		 System.out.println("StockLineAnnot: idx ("+ i +") not exist");
+                	 else if(AnnotThreading.StockLineAnnotdef.get(i) == null && AnnotThreading.StockLineAnnotadv.get(i) == null){
+                		 //System.out.println("StockLineAnnot: idx ("+ i +") not exist");
                 	 }
                 	 else{
-                		 System.out.println("StockLineFreq ----->" + StockLineFreq.get(i)+ "\tStockLineAnnot ----->" + AnnotThreading.StockLineAnnot.get(i));
-                         frqWrite.write(StockLineFreq.get(i) +  AnnotThreading.StockLineAnnot.get(i) +"\n");
+                		//System.out.println("StockLineFreq ----->" + StockLineFreq.get(i)+ "\tStockLineAnnot ----->" + AnnotThreading.StockLineAnnot.get(i));
+                		 if(annotFiles.equals("no")){
+                			 frqWrite.write(StockLineFreq.get(i) +"\n");
+                		 }
+                		 if(annotFiles.equals("def")){
+                			 frqWrite.write(StockLineFreq.get(i) +  AnnotThreading.StockLineAnnotdef.get(i) +"\n");
+                		 }
+                		 if(annotFiles.equals("adv")){
+                		 
+                         frqWrite.write(StockLineFreq.get(i) +  AnnotThreading.StockLineAnnotdef.get(i) +  AnnotThreading.StockLineAnnotadv.get(i) +"\n");
                      }
+                		 
+                	 }
                  }
                 // this bracket marks the end of VCF reading
                 // Don't need to have MAF threshold here, because not written to genotypes array if MAF too low
@@ -903,7 +915,7 @@ public class FerretData extends SwingWorker<Integer, String> {
                         // Write information about genotypes
                         for (int j = 6; j < index * 2 + 6; j++) {
                             if (Double.parseDouble(genotypes[0][j]) >= MAF && (1 - Double.parseDouble(genotypes[0][j])) >= MAF && (Double.parseDouble(genotypes[0][j]) <= MAFMax || (1 - Double.parseDouble(genotypes[0][j])) <= MAFMax)) {
-                                pedWrite.write(genotypes[i + 1][j] + "\t");
+                            	pedWrite.write(genotypes[i + 1][j] + "\t");
                             }
                         }
                         pedWrite.newLine();
@@ -946,13 +958,19 @@ public class FerretData extends SwingWorker<Integer, String> {
             System.out.println("Finished");
 
         }
-        if (usehaplo) {
-
+//        if (usehaplo) {
+//        	Process proc;
+//            try {
+//            	//Process  proc = Runtime.getRuntime().exec("java -jar \"/FerretMVC/Haploview.jar\"");
+//            	proc = Runtime.getRuntime().exec("java -jar \"Haploview.jar\" -pedfile \"" + fileName + ".ped\" -info \"" + fileName + ".info\"");
+//            } catch (IOException e) {
+//            }
+//        }
+        if (downloadHaplo) {
+        	Process proc;
             try {
-            	 //File file = new File("/home/rokhaya/Menu.html");
-            	Process  proc = Runtime.getRuntime().exec("java -jar \"/FerretMVC/Haploview.jar\"");
-            	 //Process  proc = Runtime.getRuntime().exec("java -jar \"Haploview.jar\" -pedfile \"" + fileName + "_m.ped\" -info \"" + fileName + "_m.info\"");
-            	//Desktop.getDesktop().open(file);
+            	//Process  proc = Runtime.getRuntime().exec("java -jar \"/FerretMVC/Haploview.jar\"");
+            	proc = Runtime.getRuntime().exec("java -jar \"Haploview.jar\" -pedfile \"" + fileName + ".ped\" -info \"" + fileName + ".info\"");
             } catch (IOException e) {
             }
         }

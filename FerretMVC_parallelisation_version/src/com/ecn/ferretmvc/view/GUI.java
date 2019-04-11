@@ -48,7 +48,7 @@ public class GUI extends JFrame {
     String[] amrCode = {"AMR", "CLM", "MXL", "PEL", "PUR"};
     String[] sanCode = {"SAS", "BEB", "GIH", "ITU", "PJL", "STU"};
     String[] allracesString = {"ALL"};
-    static JFrame snpFerret = new JFrame("Ferret v2.1.2");
+    static JFrame snpFerret = new JFrame("Ferret v3.0");
     JLabel afrLabel = new JLabel("Africans");
     JLabel eurLabel = new JLabel("Europeans");
     JLabel asnLabel = new JLabel("East Asians");
@@ -79,7 +79,7 @@ public class GUI extends JFrame {
     // Variant Panel Declarations
     private JTextField snpTextField = new JTextField(8);
     private JTextField snpWindowField = new JTextField(8);
-    private JTextField geneNameField = new JTextField("THBD",8);
+    private JTextField geneNameField = new JTextField(8);
     JCheckBox snpWindowCheckBox = new JCheckBox("Include surrounding variant(s) in a window of ");
     JLabel snpWindowBP = new JLabel("bp");
     JLabel snpTextLabel = new JLabel("Input variant ID(s):");
@@ -143,9 +143,8 @@ public class GUI extends JFrame {
     JPanel amrPanel = new JPanel();
     JPanel sanPanel = new JPanel();
     JPanel allracesPanel = new JPanel();
-    JButton goButton = new JButton("Download the data !");
-    //JButton testButton = new JButton("Test!");
-    JButton goHaplo = new JButton("Download and Visualize the data with HaploView !");
+    JButton goButton = new JButton("Run Ferret, Run !");
+    //JButton goHaplo = new JButton("Download and Visualize the data with HaploView !");
     JButton browseButton = new JButton("Browse");
     JFileChooser openFileChooser = new JFileChooser();
     JScrollPane scrollBigPanel = new JScrollPane(bigPanel);
@@ -195,6 +194,7 @@ public class GUI extends JFrame {
     JRadioButton freqFileButton = new JRadioButton("Allele Frequencies (.frq) only");
     JRadioButton vcfFileButton = new JRadioButton("VCF file only");
     JCheckBox htmlFileButton = new JCheckBox ("HTML file (recommended)");
+    JCheckBox downloadHaploButton = new JCheckBox ("Download and visualize the data with Haploview");
     ButtonGroup fileOutputButtons = new ButtonGroup();
     JRadioButton version19Button = new JRadioButton("hg19/GRCh37 [default]");
     JRadioButton version38Button = new JRadioButton("hg38/GRCh38 [only available for Phase 3 data]");
@@ -249,6 +249,7 @@ public class GUI extends JFrame {
     final static fileOutput[] currFileOut = {fileOutput.ALL};
     final static annotOutput[] currAnnot = {annotOutput.NO};
     boolean htmlFile = true;
+    boolean downloadHaplo = true;
     final static Boolean[] defaultHG = {true};
     final static double[] mafThreshold = {0.0};
     final static double[] mafThresholdMax = {0.5};
@@ -287,9 +288,14 @@ public class GUI extends JFrame {
     public boolean isHtmlFile() {
         return htmlFile;
     }
- 
+    public boolean isdownloadHaplo() {
+        return downloadHaplo;
+    }
     public void setHtmlFile(boolean htmlFile) {
         this.htmlFile = htmlFile;
+    }
+    public void setdownloadHaplo(boolean downloadHaplo) {
+        this.downloadHaplo = downloadHaplo;
     }
     public annotOutput[] getCurrAnnot() {
         return currAnnot;
@@ -574,6 +580,9 @@ public class GUI extends JFrame {
     public JCheckBox getHtmlFileButton() {
         return htmlFileButton;
     }
+    public JCheckBox getdownloadHaploButton() {
+        return downloadHaploButton;
+    }
     public JRadioButton getVersion19Button() {
         return version19Button;
     }
@@ -761,14 +770,15 @@ public class GUI extends JFrame {
         settingsPanel.add(freqFileButton);
         settingsPanel.add(vcfFileButton);
         settingsPanel.add(htmlFileButton);
+        settingsPanel.add(downloadHaploButton);
         // setActionCommand
         allFilesButton.setActionCommand("allFilesButton");
         freqFileButton.setActionCommand("freqFileButton");
         vcfFileButton.setActionCommand("vcfFilesButton");
 
-        //allFilesButton.setSelected(true);
+        allFilesButton.setSelected(true);
         htmlFileButton.setSelected(true);
-        freqFileButton.setSelected(true);
+        //freqFileButton.setSelected(true);
         settingsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         settingsPanel.add(hgVersionLabel);
         hgVersionLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
@@ -793,8 +803,8 @@ public class GUI extends JFrame {
 //        settingsPanel.add(no_annot);
 //        settingsPanel.add(default_annot);
 //        settingsPanel.add(advanced_annot);
-        //no_annot.setSelected(true);
-        advanced_annot.setSelected(true);
+        no_annot.setSelected(true);
+        //advanced_annot.setSelected(true);
         annotPanel.add(questionMarkAnnotations, BorderLayout.CENTER);
         questionMarkAnnotations.setToolTipText("<html>RegulomDB Score:<br><strong>Score 1a, 1b, 1c, 1d, 1e, 1f:</strong> Likely to affect binding and linked to expression of a gene target<br>"+
                 "<strong>Score 2a, 2b, 2c:</strong> Likely to affect binding<br><strong>Score 3a, 3b:</strong> Less likely to affect binding<br><strong>Score 4, 5, 6:</strong> Minimal Binding evidence<br>"+
@@ -1054,7 +1064,7 @@ public class GUI extends JFrame {
             }
         }
         // A supprimer à la fin des tests
-        eursub[2].setSelected(true);
+        //eursub[2].setSelected(true);
 
         kgPopulationPanel.add(sanPanel);
         sanPanel.setLayout(new GridLayout(9, 1));
@@ -1079,11 +1089,10 @@ public class GUI extends JFrame {
         fileChoosePanel.add(fileLocation);
         bigPanel.add(goPanel);
         goPanel.add(goButton);
-        //goPanel.add(testButton);
-        goPanel.add(goHaplo);
+        //goPanel.add(goHaplo);
         //testButton.setPreferredSize(new Dimension(320, 60));
         goButton.setPreferredSize(new Dimension(320, 60));
-        goHaplo.setPreferredSize(new Dimension(400, 60));
+        //goHaplo.setPreferredSize(new Dimension(400, 60));
         goPanel.setBackground(Color.gray);
         bigPanel.add(Box.createVerticalGlue());
         snpFerret.pack();
@@ -1119,8 +1128,7 @@ public class GUI extends JFrame {
         sansub[0].setActionCommand("sansub[0]");
         browseButton.setActionCommand("browseButton");
         goButton.setActionCommand("goButton");
-        //testButton.setActionCommand("testButton");
-        goHaplo.setActionCommand("goHaplo");
+        //goHaplo.setActionCommand("goHaplo");
         mafText.setName("mafText");
         mafTextMax.setName("mafTextMax");
         mafSlider.setName("mafSlider");
@@ -1432,6 +1440,7 @@ public class GUI extends JFrame {
         allFilesButton.addActionListener(a);
         freqFileButton.addActionListener(a);
         htmlFileButton.addActionListener(a);
+        downloadHaploButton.addActionListener(a);
         vcfFileButton.addActionListener(a);
         version19Button.addActionListener(a);
         version38Button.addActionListener(a);
@@ -1478,7 +1487,8 @@ public class GUI extends JFrame {
     public void downloadTheDataListener(ActionListener a) {
         goButton.addActionListener(a);
         //testButton.addActionListener(a);
-        goHaplo.addActionListener(a);
+        //goHaplo.addActionListener(a);
+        
     }
 
 }
