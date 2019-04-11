@@ -50,6 +50,8 @@ public class SettingsController implements ActionListener, ChangeListener, Prope
                 gui.getno_annot().setEnabled(true);
                 gui.getdefault_annot().setEnabled(true);
                 gui.getadvanced_annot().setEnabled(true);
+                gui.getHtmlFileButton().setEnabled(true);
+                gui.getHtmlFileButton().setSelected(true);
                 break;
             case "freqFileButton":
                 if (!(gui.getVersion38Button().isSelected())) {
@@ -58,15 +60,21 @@ public class SettingsController implements ActionListener, ChangeListener, Prope
                 gui.getno_annot().setEnabled(true);
                 gui.getdefault_annot().setEnabled(true);
                 gui.getadvanced_annot().setEnabled(true);
+                gui.getHtmlFileButton().setEnabled(true);
+                gui.getHtmlFileButton().setSelected(true);
                 break;
             case "vcfFilesButton":
                 if (gui.getEspMAF().isSelected()) {
                     gui.getEspMAF().setSelected(false);
                 }
+                if (gui.getHtmlFileButton().isSelected()) {
+                    gui.getHtmlFileButton().setSelected(false);
+                };
                 gui.getEspMAF().setEnabled(false);
                 gui.getno_annot().setEnabled(false);
                 gui.getdefault_annot().setEnabled(false);
                 gui.getadvanced_annot().setEnabled(false);
+                gui.getHtmlFileButton().setEnabled(false);
                 break;
             case "version19Button":
                 gui.getPhase1Button().setEnabled(true);
@@ -91,7 +99,7 @@ public class SettingsController implements ActionListener, ChangeListener, Prope
                 gui.getMafText().setValue(gui.getMafThreshold()[0]);
                 gui.getMafTextMax().setValue(gui.getMafThresholdMax()[0]);
                 gui.getMafSlider().setValue((int) (gui.getMafThreshold()[0] * 10000));
-                gui.getMafSliderMax().setValue((int) (gui.getMafThresholdMax()[0] * 10000));
+                gui.getMafSlider().setUpperValue((int) (gui.getMafThresholdMax()[0] * 10000));
 
                 if (gui.getCurrFileOut()[0] == GUI.fileOutput.VCF || !(gui.getDefaultHG()[0])) {
                     gui.getEspMAF().setEnabled(false);
@@ -101,6 +109,7 @@ public class SettingsController implements ActionListener, ChangeListener, Prope
                 gui.getEspMAF().setSelected(gui.getEspMAFBoolean()[0]);
                 gui.getAllFilesButton().setSelected(gui.getCurrFileOut()[0] == GUI.fileOutput.ALL);
                 gui.getFreqFileButton().setSelected(gui.getCurrFileOut()[0] == GUI.fileOutput.FRQ);
+                gui.getHtmlFileButton().setSelected(gui.isHtmlFile());
                 gui.getVcfFileButton().setSelected(gui.getCurrFileOut()[0] == GUI.fileOutput.VCF);
                 gui.getVcfFileButton().setEnabled(true);
                 gui.getno_annot().setSelected(gui.getCurrAnnot()[0] == GUI.annotOutput.NO);
@@ -133,6 +142,11 @@ public class SettingsController implements ActionListener, ChangeListener, Prope
                 } else if (gui.getVcfFileButton().isSelected()) {
                     gui.getCurrFileOut()[0] = GUI.fileOutput.VCF;
                 }
+                if (gui.getHtmlFileButton().isSelected()) {
+                    gui.setHtmlFile(true);
+                } else {
+                    gui.setHtmlFile(false);
+                }
                 if (gui.getno_annot().isSelected()) {
                     gui.getCurrAnnot()[0] = GUI.annotOutput.NO;
                 } else if (gui.getdefault_annot().isSelected()) {
@@ -159,15 +173,9 @@ public class SettingsController implements ActionListener, ChangeListener, Prope
                 gui.getGeneESPCheckBox().setEnabled(gui.getVersion19Button().isSelected() && !(gui.getVcfFileButton().isSelected()));
                 gui.getChrESPCheckBox().setEnabled(gui.getVersion19Button().isSelected() && !(gui.getVcfFileButton().isSelected()));
 
-                // If threshold min>threshold max
-                if (((Number) gui.getMafText().getValue()).doubleValue() < ((Number) gui.getMafTextMax().getValue()).doubleValue()) {
-                    gui.getMafThreshold()[0] = ((Number) gui.getMafText().getValue()).doubleValue();
-                    gui.getMafThresholdMax()[0] = ((Number) gui.getMafTextMax().getValue()).doubleValue();
-                } else {
-                    JOptionPane.showMessageDialog(null, "The value of MAF threshold min can not be higher than the value of the max.", "Incorrect values", JOptionPane.ERROR_MESSAGE);
-                    gui.getMafSlider().setValue(0);
-                    gui.getMafSliderMax().setValue(5000);
-                }
+                gui.getMafThreshold()[0] = ((Number) gui.getMafText().getValue()).doubleValue();
+                gui.getMafThresholdMax()[0] = ((Number) gui.getMafTextMax().getValue()).doubleValue();
+                
                 gui.getSettingsFrame().dispose();
                 break;
             default:
@@ -177,17 +185,12 @@ public class SettingsController implements ActionListener, ChangeListener, Prope
 
     @Override
     public void stateChanged(ChangeEvent e) {
-        Object js = e.getSource();
-        if (js instanceof JSlider) {
-            JSlider slider = (JSlider) js;
-            String sliderName = slider.getName();
-            if (sliderName.equals("mafSlider")) {
-                double localMAFThreshold = gui.getMafSlider().getValue();
-                gui.getMafText().setValue(localMAFThreshold / 10000);
-            } else if (sliderName.equals("mafSliderMax")) {
-                double localMAFThreshold = gui.getMafSliderMax().getValue();
-                gui.getMafTextMax().setValue(localMAFThreshold / 10000);
-            }
+        Object rs = e.getSource();
+        if (rs instanceof RangeSlider) {
+            double localMAFThreshold = gui.getMafSlider().getValue();
+            gui.getMafText().setValue(localMAFThreshold / 10000);
+            double localMAFThresholdMax = gui.getMafSlider().getUpperValue();
+            gui.getMafTextMax().setValue(localMAFThresholdMax / 10000);
         }
     }
 
@@ -216,7 +219,7 @@ public class SettingsController implements ActionListener, ChangeListener, Prope
                     localMAFThreshold = 0.0;
                     gui.getMafTextMax().setValue(localMAFThreshold);
                 }
-                gui.getMafSliderMax().setValue((int) (localMAFThreshold * 10000));
+                gui.getMafSlider().setUpperValue((int) (localMAFThreshold * 10000));
             }
         }
     }

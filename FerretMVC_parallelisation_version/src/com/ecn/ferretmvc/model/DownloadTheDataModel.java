@@ -954,6 +954,8 @@ pedfile.delete();
                             output = "vcf";
                             break;
                     }
+                    boolean htmlOutput = gui.isHtmlFile();
+                    System.out.println("htmloutput 1 true =" +htmlOutput);
                     String outputannot = null;
                     switch (gui.getCurrAnnot()[0]) {
                     case NO:
@@ -976,7 +978,7 @@ pedfile.delete();
                         webAddress = "http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/supporting/GRCh38_positions/ALL.chr$.phase3_shapeit2_mvncall_integrated_v3plus_nounphased.rsID.genotypes.GRCh38_dbSNP_no_SVs.vcf.gz";
                     }
 //LOCUS
-                    FerretData currFerretWorker = new FerretData(queries, populations, gui.getFileNameAndPath(), getESP, gui.getProgressText(), webAddress, gui.getMafThreshold()[0], gui.getMafThresholdMax()[0], gui.getEspMAFBoolean()[0], output, outputannot);
+                    FerretData currFerretWorker = new FerretData(queries, populations, gui.getFileNameAndPath(), getESP, gui.getProgressText(), webAddress, gui.getMafThreshold()[0], gui.getMafThresholdMax()[0], gui.getEspMAFBoolean()[0], output, outputannot,htmlOutput);
                     currFerretWorker.setHaplo(boolHaplo);
 
                     currFerretWorker.addPropertyChangeListener((PropertyChangeEvent evt) -> {
@@ -1287,7 +1289,9 @@ pedfile.delete();
                             break;
                     }
                     String outputannot = null;
-                    
+                    boolean htmlOutput = gui.isHtmlFile();
+                    System.out.println("htmloutput 2 true =" +htmlOutput);
+                 
                     switch (gui.getCurrAnnot()[0]) {
                     case NO:
                         outputannot = "no";
@@ -1316,7 +1320,7 @@ pedfile.delete();
                         geneQueryType = "geneID";
                     }
 //GENE
-                    FerretData currFerretWorker = new FerretData(geneQueryType, geneListArray, populations, gui.getFileNameAndPath(), getESP, gui.getProgressText(), webAddress, gui.getMafThreshold()[0], gui.getMafThresholdMax()[0], gui.getEspMAFBoolean()[0], output, gui.getDefaultHG()[0], geneWindowSelected, Integer.parseInt(geneWindowSize), 0, outputannot);
+                    FerretData currFerretWorker = new FerretData(geneQueryType, geneListArray, populations, gui.getFileNameAndPath(), getESP, gui.getProgressText(), webAddress, gui.getMafThreshold()[0], gui.getMafThresholdMax()[0], gui.getEspMAFBoolean()[0], output, gui.getDefaultHG()[0], geneWindowSelected, Integer.parseInt(geneWindowSize), 0, outputannot, htmlOutput);
                     currFerretWorker.setHaplo(boolHaplo);
 
                     currFerretWorker.addPropertyChangeListener((PropertyChangeEvent evt) -> {
@@ -1629,7 +1633,8 @@ pedfile.delete();
                             break;
                     }
                     String outputannot = null;
-
+                    boolean htmlOutput = gui.isHtmlFile();
+                    System.out.println("htmloutput 3 true =" +htmlOutput);
                     switch (gui.getCurrAnnot()[0]) {
                         case NO:
                             outputannot = "no";
@@ -1653,7 +1658,7 @@ pedfile.delete();
                     }
 //VARIANT
                     FerretData currFerretWorker = new FerretData("SNP", snpListArray, populations, gui.getFileNameAndPath(), getESP, gui.getProgressText(), webAddress, gui.getMafThreshold()[0], gui.getMafThresholdMax()[0],
-                            gui.getEspMAFBoolean()[0], output, gui.getDefaultHG()[0], snpWindowSelected, Integer.parseInt(snpWindowSize), outputannot);
+                            gui.getEspMAFBoolean()[0], output, gui.getDefaultHG()[0], snpWindowSelected, Integer.parseInt(snpWindowSize), outputannot, htmlOutput);
                     currFerretWorker.setHaplo(boolHaplo);
                     currFerretWorker.addPropertyChangeListener((PropertyChangeEvent evt) -> {
                         switch (evt.getPropertyName()) {

@@ -17,6 +17,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,14 +38,16 @@ public class AnnotThreading implements Runnable{
 	public static volatile Map<Integer, String> StockLineAnnot;
 	private int cpt;
 	private String Varid;
+	private Connection conn;
 	 
-		public AnnotThreading (int cpt,String Varid) {
+		public AnnotThreading (int cpt,String Varid,Connection conn) {
 			
 		 if(AnnotThreading.StockLineAnnot == null)
 			 AnnotThreading.StockLineAnnot = new HashMap<>();
 		 
 		 this.cpt = cpt; 
 		 this.Varid = Varid;
+		 this.conn = conn;
 		}
 
 		@Override
@@ -68,120 +72,109 @@ public class AnnotThreading implements Runnable{
 			 Boolean passee1 = false;
         	 BufferedReader br = null;
         	 BufferedReader brvep = null;
-        	//String tst = FerretData.text[2];
-        	//System.out.print("\t text[2]\t" + FerretData.text[2]);
-//            if (FerretData.text[2].contains("indel") == true){
-//         	   System.out.print("Nous avons un indel:\t" + FerretData.text[2]);
-//         	   Pattern p = Pattern.compile("^(indel_rs)([0-9]+)(.*)");
-//         	   Matcher m = p.matcher(FerretData.text[2]);
-//         	  if (m.find()) {
-//         		 Varid = m.group(2);
-//         		System.out.print("Varid indel modifié : " + Varid);
-//         	  }
-//         	  
-//            }
-//            
-//            else {
-//         	   Varid = FerretData.text[2].substring(2);
-//         	   System.out.print("Varid no indel modifié : " + Varid);
-//            }
+				String regulomeDB_score = null;
+				String rgdb_score_signification = null;
+
+
+         	   System.out.print("Varid threading : " + Varid);
+
         	
         	
-//        	try {
-//            	System.out.println("\tCe qu'il y'a dans varid dans le call run\t" + Varid);
-//                URL urlLocation = new URL("https://www.ncbi.nlm.nih.gov/projects/SNP/snp_gene.cgi?connect=&rs=" + Varid);
+        	try {
+            	System.out.println("\tCe qu'il y'a dans varid dans le call run\t" + Varid);
+                URL urlLocation = new URL("https://www.ncbi.nlm.nih.gov/projects/SNP/snp_gene.cgi?connect=&rs=" + Varid);
 //                String server = "https://rest.ensembl.org";
 //    		    String ext = "/vep/human/id/rs" + Varid+ "?content-type=application/json";
 //    		    URL urlvep = new URL(server + ext);
-//
-//    		    br = null;
+
+    		    br = null;
 //    		    brvep = null;
 //    		    URLConnection connection = urlvep.openConnection();
 //    		    HttpURLConnection httpConnection = (HttpURLConnection)connection;
 //       		
 //    		    httpConnection.setRequestProperty("Content-Type", "application/json");
-//    		    	
-//    		    try{
-//    		    	
-//    		    	br = new BufferedReader(new InputStreamReader(urlLocation.openStream()));
-//
-//                
-//                String currentString;
-//
-//                    while ((currentString = br.readLine()) != null  && !currentString.contains("\"mrnaAcc\" : ")) 
-//                    {
-//                        if (currentString.contains("\"geneSymbol\"")) {
-//                        	geneSymbol = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-//                        	System.out.print("\tgeneSymbol" + geneSymbol);
-//                        	 if (geneSymbol.equals("")) {
-//                             	geneSymbol = ".";
-//                             }
-//                    }
-//                       
-//                        
-//                        if (currentString.contains("\"geneId\"")) {
-//                        	geneId = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-//                        	System.out.print("\tgeneId" + geneId);
-//                        	if (geneId.equals("")) {
-//                             	geneId = ".";
-//                             }
-//                        }
-//                       
-//                        
-//                        
-//                        if (currentString.contains("\"proteinPos\"")) {
-//                        	proteinPos = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-//                        	System.out.print("\tproteinPos" + proteinPos);
-//                        	if (proteinPos.equals("")) {
-//                             	proteinPos = ".";
-//                             }
-//                        	
-//                        	}
-//                        	
-//                        
-//                        if (currentString.contains("\"proteinAcc\"")) {
-//                        	proteinAcc = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-//                        	System.out.print("\tproteinAcc" + proteinAcc);
-//                        	if (proteinAcc.equals("")) {
-//                            	proteinAcc = ".";
-//                            }
-//                        }
-//                        
-//                    
-//                        if (currentString.contains("\"aaCode\"") && passee1 == false) {
-//                        	aa1 = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-//                        	System.out.print("\t aacode1" + aa1);
-//                        	if (aa1.equals("")) {
-//                        		aa1 = ".";
-//                             }
-//                        	
-//                        	passee1 = true;
-//                        }
-//                        if (currentString.contains("\"aaCode\"") && passee1 == true) {
-//                        	
-//                        	aa2 = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-//                        	
-//                        	System.out.print("\t aacode2" + aa2);
-//                        	
-//                        	if (aa2.equals("")) {
-//                        		aa2 = ".";
-//                            
-//                             }
-//                        
-//                        }
-//                        
-//                       
-//                        if (currentString.contains("\"fxnName\"") && passee == false) {
-//                        	
-//                        	fxnName = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
-//                        	System.out.print("\tfxnName" + fxnName);
-//                        	passee=true;
-//                        	if (fxnName.equals("")) {
-//                             	fxnName = ".";
-//                             }
-//                        	
-//                        }
-//                    }
+    		    	
+    		    try{
+    		    	
+    		    	br = new BufferedReader(new InputStreamReader(urlLocation.openStream()));
+
+                
+                String currentString;
+
+                    while ((currentString = br.readLine()) != null  && !currentString.contains("\"mrnaAcc\" : ")) 
+                    {
+                        if (currentString.contains("\"geneSymbol\"")) {
+                        	geneSymbol = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
+                        	System.out.print("\tgeneSymbol" + geneSymbol);
+                        	 if (geneSymbol.equals("")) {
+                             	geneSymbol = ".";
+                             }
+                    }
+                       
+                        
+                        if (currentString.contains("\"geneId\"")) {
+                        	geneId = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
+                        	System.out.print("\tgeneId" + geneId);
+                        	if (geneId.equals("")) {
+                             	geneId = ".";
+                             }
+                        }
+                       
+                        
+                        
+                        if (currentString.contains("\"proteinPos\"")) {
+                        	proteinPos = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
+                        	System.out.print("\tproteinPos" + proteinPos);
+                        	if (proteinPos.equals("")) {
+                             	proteinPos = ".";
+                             }
+                        	
+                        	}
+                        	
+                        
+                        if (currentString.contains("\"proteinAcc\"")) {
+                        	proteinAcc = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
+                        	System.out.print("\tproteinAcc" + proteinAcc);
+                        	if (proteinAcc.equals("")) {
+                            	proteinAcc = ".";
+                            }
+                        }
+                        
+                    
+                        if (currentString.contains("\"aaCode\"") && passee1 == false) {
+                        	aa1 = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
+                        	System.out.print("\t aacode1" + aa1);
+                        	if (aa1.equals("")) {
+                        		aa1 = ".";
+                             }
+                        	
+                        	passee1 = true;
+                        }
+                        if (currentString.contains("\"aaCode\"") && passee1 == true) {
+                        	
+                        	aa2 = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
+                        	
+                        	System.out.print("\t aacode2" + aa2);
+                        	
+                        	if (aa2.equals("")) {
+                        		aa2 = ".";
+                            
+                             }
+                        
+                        }
+                        
+                       
+                        if (currentString.contains("\"fxnName\"") && passee == false) {
+                        	
+                        	fxnName = currentString.substring(currentString.indexOf(" : \"") + 4, currentString.indexOf("\","));
+                        	System.out.print("\tfxnName" + fxnName);
+                        	passee=true;
+                        	if (fxnName.equals("")) {
+                             	fxnName = ".";
+                             }
+                        	
+                        }
+                    }
                   //br.close();
 
 // 	           ***********ICI COMMENCE L'EXTRACTION VEP*************
@@ -275,18 +268,48 @@ public class AnnotThreading implements Runnable{
 //					        }
 //						 
 //					   }
+					// Requesting regulomeDB and preparing explanation for the score
+					ResultSet res = conn.createStatement()
+							.executeQuery("SELECT score FROM scores_table WHERE variant='rs" + Varid + "';");
+					if (res.next()) {
+						regulomeDB_score = res.getString("score");
+						if (regulomeDB_score.equals("1a") || regulomeDB_score.equals("1b")
+								|| regulomeDB_score.equals("1c") || regulomeDB_score.equals("1d")
+								|| regulomeDB_score.equals("1e") || regulomeDB_score.equals("1f")) {
+							rgdb_score_signification = "(likely to affect binding and linked to expression of a gene target)";
+						} else if (regulomeDB_score.equals("2a") || regulomeDB_score.equals("2b")
+								|| regulomeDB_score.equals("2c")) {
+							rgdb_score_signification = "(likely to affect binding)";
+						} else if (regulomeDB_score.equals("3a") || regulomeDB_score.equals("3b")) {
+							rgdb_score_signification = "(less likely to affect binding)";
+						} else if (regulomeDB_score.equals("4") || regulomeDB_score.equals("5")
+								|| regulomeDB_score.equals("6")) {
+							rgdb_score_signification = "(minimal binding evidence)";
+						} else if (regulomeDB_score.equals("7")) {
+							rgdb_score_signification = "(no data)";
+						}
+					} else {
+						regulomeDB_score = "not in the base";
+						rgdb_score_signification = "(regulomeDB may not be up to date)";
+					}
 
-                    AnnotThreading.StockLineAnnot.put(this.cpt, Varid + "\t" +geneSymbol + "\t" + geneId+ "\t" + fxnName + "\t" + proteinPos + "\t" + aa2 + aa1  + "\t" + proteinAcc + "\t" + sift_score+ "\t" + sift_prediction+ "\t" + polyphen_score+ "\t" + polyphen_prediction);
+                    AnnotThreading.StockLineAnnot.put(this.cpt,geneSymbol + "\t" + geneId+ "\t" + fxnName + "\t" + proteinPos + "\t" + aa2 + aa1  + "\t" + proteinAcc+ "\t" + sift_score + "\t" + sift_prediction + "\t"
+							+ polyphen_score + "\t" + polyphen_prediction+ "\t" + regulomeDB_score + "\t"
+							+ rgdb_score_signification);
                     
-//    			} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//					}catch (Exception e2) {
-//	              	     e2.printStackTrace();
-//                    }
-//        	} catch (IOException e) {
-//            }
-			
+    			} catch (IOException e) {
+    				
+					e.printStackTrace();
+					System.out.print("e");
+					//if (message : tantantan)
+				}catch (Exception e2) {
+              	     e2.printStackTrace();
+              	   System.out.print("e1");
+                }
+        	} catch (IOException e) {
+				e.printStackTrace();
+				System.out.print("e2");
+            }
 		}
 
 		

@@ -10,8 +10,11 @@ package com.ecn.ferretmvc.view;
 // import classes
 import java.awt.Color;
 import java.awt.Component;
+
 import static java.awt.Component.CENTER_ALIGNMENT;
 import static java.awt.Component.LEFT_ALIGNMENT;
+
+import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -23,8 +26,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.Hashtable;
+
 import javax.swing.*;
+
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
+
 import javax.swing.event.ChangeListener;
 
 public class GUI extends JFrame {
@@ -73,7 +79,7 @@ public class GUI extends JFrame {
     // Variant Panel Declarations
     private JTextField snpTextField = new JTextField(8);
     private JTextField snpWindowField = new JTextField(8);
-    private JTextField geneNameField = new JTextField(8);
+    private JTextField geneNameField = new JTextField("THBD",8);
     JCheckBox snpWindowCheckBox = new JCheckBox("Include surrounding variant(s) in a window of ");
     JLabel snpWindowBP = new JLabel("bp");
     JLabel snpTextLabel = new JLabel("Input variant ID(s):");
@@ -171,22 +177,24 @@ public class GUI extends JFrame {
     JMenuItem aboutMenuItem = new JMenuItem("About Ferret");
     JMenuItem faqMenuItem = new JMenuItem("FAQ");
     JMenuItem contactMenuItem = new JMenuItem("Contact");
-    JLabel questionMarkMAFThreshold = new JLabel(questionMark);
-    JLabel questionMarkESPMAF = new JLabel(questionMark);
+//    JLabel questionMarkMAFThreshold = new JLabel(questionMark);
+//    JLabel questionMarkESPMAF = new JLabel(questionMark);
 
     //Settings pane:
     JFrame settingsFrame = new JFrame("Settings");
     JPanel settingsPanel = new JPanel();
     JTextField vcfURLText = new JTextField();
     JTextField fileNomenclatureText = new JTextField();
-    JSlider mafSlider = new JSlider(0, 5000, 0);
-    JSlider mafSliderMax = new JSlider(0, 5000, 0);
+    RangeSlider mafSlider = new RangeSlider(0, 5000);
+//    JSlider mafSlider = new JSlider(0, 5000, 0);
+//    JSlider mafSliderMax = new JSlider(0, 5000, 0);
     JRadioButton phase3Button = new JRadioButton("Phase 3 (2,504 individuals) [default]");
     JRadioButton phase1Button = new JRadioButton("Phase 1 (1,092 individuals)");
     ButtonGroup vcfRadioButtons = new ButtonGroup();
     JRadioButton allFilesButton = new JRadioButton("Allele Frequencies (.frq) + Plink/HaploView (.map/.ped/.info) [default]");
     JRadioButton freqFileButton = new JRadioButton("Allele Frequencies (.frq) only");
     JRadioButton vcfFileButton = new JRadioButton("VCF file only");
+    JCheckBox htmlFileButton = new JCheckBox ("HTML file (recommended)");
     ButtonGroup fileOutputButtons = new ButtonGroup();
     JRadioButton version19Button = new JRadioButton("hg19/GRCh37 [default]");
     JRadioButton version38Button = new JRadioButton("hg38/GRCh38 [only available for Phase 3 data]");
@@ -209,8 +217,12 @@ public class GUI extends JFrame {
     JPanel mafESPPanel = new JPanel();
     JPanel vcfVersionPanel = new JPanel();
     JPanel settingsButtonPanel = new JPanel();
+    JPanel annotPanel = new JPanel();
+    JPanel annotButtonPanel = new JPanel();
     JCheckBox espMAF = new JCheckBox("Apply MAF threshold to the Exome Sequencing Project");
-
+    JLabel questionMarkMAFThreshold = new JLabel(questionMark);
+    JLabel questionMarkESPMAF = new JLabel(questionMark);
+    JLabel questionMarkAnnotations = new JLabel(questionMark);
     //About window
     JFrame aboutFrame = new JFrame("About");
     JPanel aboutPanel = new JPanel();
@@ -236,6 +248,7 @@ public class GUI extends JFrame {
     final static version1KG[] currVersion = {version1KG.THREE};
     final static fileOutput[] currFileOut = {fileOutput.ALL};
     final static annotOutput[] currAnnot = {annotOutput.NO};
+    boolean htmlFile = true;
     final static Boolean[] defaultHG = {true};
     final static double[] mafThreshold = {0.0};
     final static double[] mafThresholdMax = {0.5};
@@ -270,6 +283,13 @@ public class GUI extends JFrame {
 
     public fileOutput[] getCurrFileOut() {
         return currFileOut;
+    }
+    public boolean isHtmlFile() {
+        return htmlFile;
+    }
+ 
+    public void setHtmlFile(boolean htmlFile) {
+        this.htmlFile = htmlFile;
     }
     public annotOutput[] getCurrAnnot() {
         return currAnnot;
@@ -527,12 +547,8 @@ public class GUI extends JFrame {
         return settingsFrame;
     }
 
-    public JSlider getMafSlider() {
+    public RangeSlider getMafSlider() {
         return mafSlider;
-    }
-
-    public JSlider getMafSliderMax() {
-        return mafSliderMax;
     }
 
     public JRadioButton getPhase3Button() {
@@ -554,7 +570,10 @@ public class GUI extends JFrame {
     public JRadioButton getVcfFileButton() {
         return vcfFileButton;
     }
-
+    
+    public JCheckBox getHtmlFileButton() {
+        return htmlFileButton;
+    }
     public JRadioButton getVersion19Button() {
         return version19Button;
     }
@@ -583,7 +602,10 @@ public class GUI extends JFrame {
     public JFrame getContactFrame() {
         return contactFrame;
     }
-
+    
+    public void setMafSlider(RangeSlider mafSlider) {
+        this.mafSlider = mafSlider;
+    }
     // Constructor GUI
     public GUI() {
         LinkLabel ferretWebLabelAbout = null;
@@ -699,21 +721,21 @@ public class GUI extends JFrame {
         mafSlider.setValue(0);
         mafSlider.setPaintLabels(true);
         mafPanel.add(mafSlider);
-
+        mafSlider.setUpperValue(5000);
         mafTextMax.setColumns(5);
         mafTextMax.setMaximumSize(mafTextMax.getPreferredSize());
         mafTextMax.setValue(0.5);
         mafPanel.add(mafTextMax);
 
-        mafSliderMax.setMajorTickSpacing(1000);
-        mafSliderMax.setPaintTicks(true);
-        Hashtable labelTable2 = new Hashtable();
-        labelTable2.put(0, new JLabel("0.0"));
-        labelTable2.put(5000, new JLabel("0.5"));
-        mafSliderMax.setLabelTable(labelTable2);
-        mafSliderMax.setValue(5000);
-        mafSliderMax.setPaintLabels(true);
-        mafPanel.add(mafSliderMax);
+//        mafSliderMax.setMajorTickSpacing(1000);
+//        mafSliderMax.setPaintTicks(true);
+//        Hashtable labelTable2 = new Hashtable();
+//        labelTable2.put(0, new JLabel("0.0"));
+//        labelTable2.put(5000, new JLabel("0.5"));
+//        mafSliderMax.setLabelTable(labelTable2);
+//        mafSliderMax.setValue(5000);
+//        mafSliderMax.setPaintLabels(true);
+//        mafPanel.add(mafSliderMax);
 
         mafPanel.add(questionMarkMAFThreshold);
         questionMarkMAFThreshold.setToolTipText("<html>The MAF threshold is applied to the selected 1000 Genomes populations<br>"
@@ -738,13 +760,14 @@ public class GUI extends JFrame {
         settingsPanel.add(allFilesButton);
         settingsPanel.add(freqFileButton);
         settingsPanel.add(vcfFileButton);
-
+        settingsPanel.add(htmlFileButton);
         // setActionCommand
         allFilesButton.setActionCommand("allFilesButton");
         freqFileButton.setActionCommand("freqFileButton");
         vcfFileButton.setActionCommand("vcfFilesButton");
 
         //allFilesButton.setSelected(true);
+        htmlFileButton.setSelected(true);
         freqFileButton.setSelected(true);
         settingsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         settingsPanel.add(hgVersionLabel);
@@ -760,11 +783,23 @@ public class GUI extends JFrame {
         annotButtons.add(no_annot);
         annotButtons.add(default_annot);
         annotButtons.add(advanced_annot);
-        settingsPanel.add(no_annot);
-        settingsPanel.add(default_annot);
-        settingsPanel.add(advanced_annot);
+        annotPanel.setLayout(new BoxLayout(annotPanel, BoxLayout.X_AXIS));
+        annotPanel.setAlignmentX(LEFT_ALIGNMENT);
+        annotPanel.add(annotButtonPanel, BorderLayout.WEST);
+        annotButtonPanel.setLayout(new GridLayout(3, 1));
+        annotButtonPanel.add(no_annot);
+        annotButtonPanel.add(default_annot);
+        annotButtonPanel.add(advanced_annot);
+//        settingsPanel.add(no_annot);
+//        settingsPanel.add(default_annot);
+//        settingsPanel.add(advanced_annot);
         //no_annot.setSelected(true);
         advanced_annot.setSelected(true);
+        annotPanel.add(questionMarkAnnotations, BorderLayout.CENTER);
+        questionMarkAnnotations.setToolTipText("<html>RegulomDB Score:<br><strong>Score 1a, 1b, 1c, 1d, 1e, 1f:</strong> Likely to affect binding and linked to expression of a gene target<br>"+
+                "<strong>Score 2a, 2b, 2c:</strong> Likely to affect binding<br><strong>Score 3a, 3b:</strong> Less likely to affect binding<br><strong>Score 4, 5, 6:</strong> Minimal Binding evidence<br>"+
+                "<strong>Score 7:</strong> No data");
+        settingsPanel.add(annotPanel);
         
         settingsButtonPanel.setAlignmentX(LEFT_ALIGNMENT);
         settingsButtonPanel.setLayout(new BoxLayout(settingsButtonPanel, BoxLayout.X_AXIS));
@@ -1089,7 +1124,7 @@ public class GUI extends JFrame {
         mafText.setName("mafText");
         mafTextMax.setName("mafTextMax");
         mafSlider.setName("mafSlider");
-        mafSliderMax.setName("mafSliderMax");
+        //mafSliderMax.setName("mafSliderMax");
 
     }
 
@@ -1396,6 +1431,7 @@ public class GUI extends JFrame {
         advanced_annot.addActionListener(a);
         allFilesButton.addActionListener(a);
         freqFileButton.addActionListener(a);
+        htmlFileButton.addActionListener(a);
         vcfFileButton.addActionListener(a);
         version19Button.addActionListener(a);
         version38Button.addActionListener(a);
@@ -1405,7 +1441,7 @@ public class GUI extends JFrame {
 
     public void settingsChangeListener(ChangeListener c) {
         mafSlider.addChangeListener(c);
-        mafSliderMax.addChangeListener(c);
+        //mafSliderMax.addChangeListener(c);
     }
 
     public void settingsPropertyChangeListener(PropertyChangeListener p) {
